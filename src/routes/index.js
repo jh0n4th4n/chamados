@@ -2,6 +2,7 @@ import { Routes, Route } from 'react-router-dom';
 
 import SingIn from '../pages/SingIn';
 import SingUp from '../pages/SingUp';
+import Dashboard from '../pages/Dashboard';
 
 
 function RoutesApp(){
@@ -9,6 +10,9 @@ function RoutesApp(){
         <Routes>
             <Route path='/' element={<SingIn />} />
             <Route path='/register' element={<SingUp />} />
+            
+            <Route path='/dashboard' element={<Dashboard />} />
+
         </Routes>
     )
 }
