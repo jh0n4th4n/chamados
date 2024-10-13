@@ -12,26 +12,19 @@ export default function Customers() {
   const [nome, setNome] = useState('');
   const [telefone, setTelefone] = useState('');
   const [endereco, setEndereco] = useState('');
-  const [loading, setLoading] = useState(false); // Para gerenciar o estado de carregamento
+  const [loading, setLoading] = useState(false);
 
   async function handleRegister(e) {
     e.preventDefault();
 
-    // Verifique se o usuário está autenticado
-    if (!user || !user.uid) {
-      toast.error("Usuário não autenticado. Por favor, faça o login.");
-      return;
-    }
-
     if (nome !== '' && telefone !== '' && endereco !== '') {
-      setLoading(true); // Começar o carregamento
+      setLoading(true);
 
       try {
         await addDoc(collection(db, "customers"), {
           nomeFantasia: nome,
           telefone: telefone,
           endereco: endereco,
-          userId: user.uid  // Salve o ID do usuário autenticado
         });
         setNome('');
         setTelefone('');
@@ -41,7 +34,7 @@ export default function Customers() {
         toast.error("Erro ao fazer o cadastro.");
         console.log(error)
       } finally {
-        setLoading(false); // Finalizar o carregamento
+        setLoading(false);
       }
     } else {
       toast.error("Preencha todos os campos!");

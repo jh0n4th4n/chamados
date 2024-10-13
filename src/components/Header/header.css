@@ -10,7 +10,7 @@
 
 .sidebar div {
   background: url("../../assets/cover.png");
-  background-color: #181c2e;
+  background-color: #000000;
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
@@ -18,12 +18,12 @@
 }
 
 .sidebar div {
-  padding-top: 30px;
+  padding-top: 25px;
 }
 
 .sidebar div img {
-  width: 90px;
-  height: 90px;
+  width: 100px;
+  height: 100px;
   display: block;
   margin: auto;
   border-radius: 50%;
@@ -37,10 +37,12 @@
   padding: 16px;
   display: flex;
   text-decoration: none;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgb(255, 255, 255);
+  font-weight: bold;
   flex-direction: row;
   align-items: center;
   transition: ease-in-out 0.4s;
+  letter-spacing: 2px;
 }
 
 .sidebar a svg {
@@ -49,7 +51,7 @@
 
 .sidebar a:hover {
   background-color: #121212;
-  color: #fff;
+  color: #6c8ce4;
 }
 
 .content {
