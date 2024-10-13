@@ -8,6 +8,7 @@ import Customers from '../pages/Customers';
 import New from '../pages/New';
 
 import Private from './Private';
+import Graphs from '../pages/Graficos';
 
 function RoutesApp() {
   return (
@@ -24,6 +25,8 @@ function RoutesApp() {
       <Route path="/new" element={<Private><New /></Private>} />
 
       <Route path="/new/:id" element={<Private><New /></Private>} />
+
+      <Route path="/graphs" element={<Private><Graphs /></Private>} />
     </Routes>
   )
 }

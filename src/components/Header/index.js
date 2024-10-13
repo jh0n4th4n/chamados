@@ -3,7 +3,7 @@ import avatarImg from '../../assets/avatar.png'
 import { Link } from 'react-router-dom'
 
 import { AuthContext } from '../../contexts/auth'
-import { FiHome, FiUser, FiSettings } from 'react-icons/fi'
+import { FiHome, FiUser, FiSettings, FiSlack  } from 'react-icons/fi'
 import './header.css';
 
 export default function Header(){
@@ -28,6 +28,11 @@ export default function Header(){
       <Link to="/profile">
         <FiSettings color="#FFF" size={24} />
         Perfil
+      </Link>
+
+      <Link to="/graphs">
+        <FiSlack   color="#FFF" size={24} />
+        Graficos
       </Link>
     </div>
   )
