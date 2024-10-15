@@ -4,65 +4,47 @@ import Title from "../../components/Title";
 import { useState, useEffect } from 'react';
 import { db } from '../../services/firebaseConnection';
 import { collection, getDocs } from 'firebase/firestore';
-import { XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { BarChart, Bar } from 'recharts';
+import React from 'react';
+import { BarChart, Bar, XAxis, Tooltip, Legend, ResponsiveContainer, Cell, LabelList } from 'recharts';
 
 export default function Graphs() {
     const [data, setData] = useState([]);
 
-    useEffect(() => {
-        async function loadData() {
-            try {
-                const snapshot = await getDocs(collection(db, 'chamados'));
-                let statusCount = {
-                    'Aberto': 0,
-                    'Progresso': 0,
-                    'Atendido': 0,
-                };
-
-                snapshot.forEach(doc => {
-                    const chamado = doc.data();
-                    statusCount[chamado.status] += 1; // Incrementa o contador do status correspondente
-                });
-
-                const chartData = Object.keys(statusCount).map(status => ({
-                    status: status,
-                    count: statusCount[status],
-                }));
-
-                setData(chartData);
-            } catch (error) {
-                console.error("Erro ao buscar dados: ", error);
-            }
-        }
-
-        loadData();
-    }, []);
-
-    // Mapeamento de status para cores
-    const statusColors = {
-        'Aberto': '#8884d8',
-        'Fechado': '#82ca9d',
-        'Em andamento': '#ffc658',
+    // Defina um mapeamento de cores por status
+    const colors = {
+        Atendido: "#8884d8",
+        Progresso: "#82ca9d",
+        Aberto: "#ffc658",
+        quantidade: "#000000"
     };
 
-    // Gráfico de Barras (Quantidade de chamados por status)
-    const barCharts = (
-        <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={data} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis type="number" />
-                <YAxis type="category" dataKey="status" />
-                <Tooltip />
-                <Legend />
-                <Bar
-                    dataKey="count"
-                    fill={({ payload }) => statusColors[payload.status]}
-                    label={{ position: 'right', fill: '#000' }} // Mostra a quantidade de chamados no gráfico
-                />
-            </BarChart>
-        </ResponsiveContainer>
-    );
+    useEffect(() => {
+        async function fetchData() {
+            const chamadosCollection = collection(db, "chamados"); // Coleção de chamados
+            const chamadosSnapshot = await getDocs(chamadosCollection);
+
+            // Contar chamados por status
+            const statusCount = {};
+            chamadosSnapshot.docs.forEach(doc => {
+                const status = doc.data().status; // Extrair o status do documento
+                if (statusCount[status]) {
+                    statusCount[status]++;
+                } else {
+                    statusCount[status] = 1;
+                }
+            });
+
+            // Converter para o formato do gráfico
+            const chartData = Object.keys(statusCount).map(status => ({
+                name: status,    // O nome será o status (ex: "concluido", "pendente")
+                quantidade: statusCount[status], // O valor será o número de chamados com esse status
+            }));
+
+            setData(chartData);
+        }
+
+        fetchData();
+    }, []);
 
     return (
         <div>
@@ -76,8 +58,34 @@ export default function Graphs() {
                         <h2>Dashboard de Chamados</h2>
 
                         <div className="chart-container">
-                            <h3>Distribuição de Status</h3>
-                            {barCharts}
+                            <ResponsiveContainer width={500} height={500}>
+                                <BarChart
+                                    width={500}
+                                    height={300}
+                                    data={data}
+                                    margin={{
+                                        top: 20,
+                                        right: 30,
+                                        left: 20,
+                                        bottom: 5,
+                                    }}
+                                >
+                                    {/* Removendo o YAxis para ocultar a coluna lateral */}
+                                    <XAxis dataKey="name" />
+                                    <Tooltip />
+                                    {/* Legenda que usará as mesmas cores que as barras */}
+                                    <Legend formatter={(value) => <span style={{ color: colors[value] }}>{value}</span>} />
+                                    <Bar dataKey="quantidade">
+                                        {
+                                            data.map((entry, index) => (
+                                                <Cell key={`cell-${index}`} fill={colors[entry.name]} />
+                                            ))
+                                        }
+                                        {/* Exibir valores em cima das barras */}
+                                        <LabelList dataKey="quantidade" position="top" />
+                                    </Bar>
+                                </BarChart>
+                            </ResponsiveContainer>
                         </div>
                     </div>
                 </div>

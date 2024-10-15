@@ -28,6 +28,20 @@ export default function New() {
   const [status, setStatus] = useState('Aberto');
   const [idCustomer, setIdCustomer] = useState(false);
 
+  // Lista de assuntos relacionados a TI
+  const assuntosTI = [
+    'Suporte Técnico',
+    'Problemas de Rede',
+    'Problemas de Hardware',
+    'Problemas de Software',
+    'Manutenção de Equipamentos',
+    'Configuração de Sistemas',
+    'Treinamento de Usuários',
+    'Segurança da Informação',
+    'Backup de Dados',
+    'Atualização de Software',
+  ];
+
   useEffect(() => {
     async function loadCustomers() {
       try {
@@ -174,7 +188,11 @@ export default function New() {
 
             <label>Assunto</label>
             <select value={assunto} onChange={handleChangeSelect}>
-              {/* Opções de assunto... */}
+              {assuntosTI.map((item, index) => (
+                <option key={index} value={item}>
+                  {item}
+                </option>
+              ))}
             </select>
 
             <label>Status</label>
