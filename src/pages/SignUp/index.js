@@ -11,6 +11,15 @@ export default function SignUp() {
 
   const { signUp, loadingAuth } = useContext(AuthContext);
 
+  // Definindo os setores em um objeto
+  const setores = {
+    TI: 'Tecnologia da Informação',
+    Farmácia: 'Farmácia',
+    Manutenção: 'Manutenção',
+    Administrativo: 'Administrativo',
+    Limpeza: 'Limpeza'
+  };
+
   async function handleSubmit(e) {
     e.preventDefault();
 
@@ -54,10 +63,11 @@ export default function SignUp() {
             onChange={(e) => setSetor(e.target.value)}
           >
             <option value="">Selecione seu setor</option>
-            <option value="TI">TI</option>
-            <option value="Farmácia">Farmácia</option>
-            <option value="Manutenção">Manutenção</option>
-            <option value="Administrativo">Administrativo</option>
+            {Object.entries(setores).map(([key, value]) => (
+              <option key={key} value={key}>
+                {value}
+              </option>
+            ))}
           </select>
 
           <button type="submit">
