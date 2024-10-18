@@ -142,7 +142,7 @@ export default function Dashboard() {
                 Novo chamado
               </Link>
 
-              <table>
+              <table> 
                 <thead>
                   <tr>
                     <th scope="col">Cliente</th>
