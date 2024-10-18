@@ -207,6 +207,7 @@ export default function New() {
               <span>Em aberto</span>
 
               <input
+              className='status'
                 type="radio"
                 name="radio"
                 value="Progresso"

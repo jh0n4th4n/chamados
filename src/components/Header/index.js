@@ -25,14 +25,14 @@ export default function Header(){
         Clientes
       </Link>
 
-      <Link to="/profile">
-        <FiSettings color="#FFF" size={24} />
-        Perfil
-      </Link>
-
       <Link to="/graphs">
         <FiSlack   color="#FFF" size={24} />
         Graficos
+      </Link>
+      
+      <Link to="/profile">
+        <FiSettings color="#FFF" size={24} />
+        Perfil
       </Link>
     </div>
   )
