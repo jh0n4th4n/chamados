@@ -134,9 +134,9 @@ export default function Dashboard() {
                         <button className="action" style={{ backgroundColor: '#3583f6' }} onClick={() => toggleModal(item)}>
                           <FiSearch color='#FFF' size={17} />
                         </button>
-                        <Link to={`/new/${item.id}`} className="action" style={{ backgroundColor: '#f6a935' }}>
+                        <button to={`/new/${item.id}`} className="action" style={{ backgroundColor: '#f6a935' }}>
                           <FiEdit2 color='#FFF' size={17} />
-                        </Link>
+                        </button>
                         {user.role === 'admin' && (
                           <button className="action" style={{ backgroundColor: '#d9534f' }} onClick={() => handleDelete(item.id)}>
                             <FiTrash2 color='#FFF' size={17} />
