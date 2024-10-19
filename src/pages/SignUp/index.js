@@ -8,6 +8,7 @@ export default function SignUp() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [setor, setSetor] = useState('');
+  const [role, setRole] = useState('user'); // Adicionando estado para o papel do usuário
 
   const { signUp, loadingAuth } = useContext(AuthContext);
 
@@ -20,11 +21,18 @@ export default function SignUp() {
     Limpeza: 'Limpeza'
   };
 
+  // Definindo os papéis disponíveis
+  const roles = {
+    admin: 'Administrador',
+    user: 'Usuário'
+  };
+
   async function handleSubmit(e) {
     e.preventDefault();
 
-    if (name !== '' && email !== '' && password !== '' && setor !== '') {
-      await signUp(email, password, name, setor);
+    if (name !== '' && email !== '' && password !== '' && setor !== '' && role !== '') {
+      // Passando o papel do usuário para o método signUp
+      await signUp(email, password, name, setor, role);
     }
   }
 
@@ -64,6 +72,18 @@ export default function SignUp() {
           >
             <option value="">Selecione seu setor</option>
             {Object.entries(setores).map(([key, value]) => (
+              <option key={key} value={key}>
+                {value}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={role}
+            onChange={(e) => setRole(e.target.value)}
+          >
+            <option value="">Selecione seu papel</option>
+            {Object.entries(roles).map(([key, value]) => (
               <option key={key} value={key}>
                 {value}
               </option>

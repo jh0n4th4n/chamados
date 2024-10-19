@@ -5,7 +5,6 @@ import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
-
 export const AuthContext = createContext({});
 
 function AuthProvider({ children }) {
@@ -25,6 +24,7 @@ function AuthProvider({ children }) {
     loadUser();
   }, []);
 
+  // Função para login de usuário
   async function signIn(email, password) {
     setLoadingAuth(true);
     try {
@@ -39,6 +39,7 @@ function AuthProvider({ children }) {
         nome: docSnap.data().nome,
         email: value.user.email,
         avatarUrl: docSnap.data().avatarUrl,
+        role: docSnap.data().role,  // Adicionando o papel do usuário
       };
 
       setUser(data);
@@ -53,7 +54,8 @@ function AuthProvider({ children }) {
     }
   }
 
-  async function signUp(email, password, name, setor) {
+  // Função para cadastro de usuário com campo 'role'
+  async function signUp(email, password, name, setor, role = 'user') {
     setLoadingAuth(true);
     try {
       const value = await createUserWithEmailAndPassword(auth, email, password);
@@ -64,6 +66,7 @@ function AuthProvider({ children }) {
         avatarUrl: null,
         email: email,
         setor: setor,
+        role: role,  // Salvando o papel do usuário
       });
 
       const data = {
@@ -71,6 +74,7 @@ function AuthProvider({ children }) {
         nome: name,
         email: value.user.email,
         avatarUrl: null,
+        role: role,  // Adicionando o papel do usuário no estado
       };
 
       setUser(data);

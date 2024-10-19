@@ -24,10 +24,19 @@ export default function Dashboard() {
 
   useEffect(() => {
     async function loadChamados() {
-      const userId = user.uid; // Obter o UID do usuário autenticado
-      const q = query(listRef, where('userId', '==', userId), orderBy('created', 'desc'), limit(5));
+      let chamadosQuery;
 
-      const querySnapshot = await getDocs(q);
+      // Verifica se o usuário é administrador
+      if (user.role === 'admin') {
+        // Administradores veem todos os chamados
+        chamadosQuery = query(listRef, orderBy('created', 'desc'), limit(5));
+      } else {
+        // Usuários comuns veem apenas seus próprios chamados
+        const userId = user.uid;
+        chamadosQuery = query(listRef, where('userId', '==', userId), orderBy('created', 'desc'), limit(5));
+      }
+
+      const querySnapshot = await getDocs(chamadosQuery);
       setChamados([]);
       await updateState(querySnapshot);
       setLoading(false);
@@ -72,9 +81,17 @@ export default function Dashboard() {
     if (loadingMore) return; // Evitar múltiplas chamadas
 
     setLoadingMore(true);
-    const userId = user.uid; // Obter o UID do usuário autenticado
-    const q = query(listRef, where('userId', '==', userId), orderBy('created', 'desc'), startAfter(lastDocs), limit(5));
-    const querySnapshot = await getDocs(q);
+    let chamadosQuery;
+
+    // Verifica se o usuário é administrador para carregar mais chamados
+    if (user.role === 'admin') {
+      chamadosQuery = query(listRef, orderBy('created', 'desc'), startAfter(lastDocs), limit(5)); // Administrador carrega todos
+    } else {
+      const userId = user.uid;
+      chamadosQuery = query(listRef, where('userId', '==', userId), orderBy('created', 'desc'), startAfter(lastDocs), limit(5)); // Usuário carrega apenas os seus chamados
+    }
+
+    const querySnapshot = await getDocs(chamadosQuery);
     await updateState(querySnapshot);
   }
 
