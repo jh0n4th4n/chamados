@@ -2,18 +2,19 @@ import { useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../../contexts/auth';
 import Header from '../../components/Header';
 import Title from '../../components/Title';
-import { FiPlus, FiMessageSquare, FiSearch, FiEdit2 } from 'react-icons/fi';
+import { FiPlus, FiMessageSquare, FiSearch, FiEdit2, FiTrash2 } from 'react-icons/fi'; // Importando o ícone de deletar
 import { Link } from 'react-router-dom';
-import { collection, getDocs, orderBy, limit, startAfter, query, where } from 'firebase/firestore';
+import { collection, getDocs, orderBy, limit, startAfter, query, where, deleteDoc, doc } from 'firebase/firestore'; // Adicionando 'doc'
 import { db } from '../../services/firebaseConnection';
 import { format } from 'date-fns';
 import Modal from '../../components/Modal';
 import './dashboard.css';
 
+
 const listRef = collection(db, "chamados");
 
 export default function Dashboard() {
-  const { logout, user } = useContext(AuthContext); // Assumindo que o contexto fornece o usuário autenticado
+  const { logout, user } = useContext(AuthContext);
   const [chamados, setChamados] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isEmpty, setIsEmpty] = useState(false);
@@ -45,7 +46,7 @@ export default function Dashboard() {
     loadChamados();
 
     return () => { }
-  }, [user]); // Adicione 'user' como dependência
+  }, [user]);
 
   async function updateState(querySnapshot) {
     const isCollectionEmpty = querySnapshot.size === 0;
@@ -56,17 +57,18 @@ export default function Dashboard() {
       querySnapshot.forEach((doc) => {
         lista.push({
           id: doc.id,
+          usuario: doc.data().usuario || user.nome,
           assunto: doc.data().assunto,
           cliente: doc.data().cliente,
           clienteId: doc.data().clienteId,
           created: doc.data().created,
-          createdFormat: format(doc.data().created.toDate(), 'dd/MM/yyyy'),
+          createdFormat: format(doc.data().created.toDate(), 'dd/MM/yyyy HH:mm:ss a'),
           status: doc.data().status,
           complemento: doc.data().complemento,
         });
       });
 
-      const lastDoc = querySnapshot.docs[querySnapshot.docs.length - 1]; // Pegando o último item
+      const lastDoc = querySnapshot.docs[querySnapshot.docs.length - 1];
 
       setChamados(chamados => [...chamados, ...lista]);
       setLastDocs(lastDoc);
@@ -78,21 +80,29 @@ export default function Dashboard() {
   }
 
   async function handleMore() {
-    if (loadingMore) return; // Evitar múltiplas chamadas
+    if (loadingMore) return;
 
     setLoadingMore(true);
     let chamadosQuery;
 
     // Verifica se o usuário é administrador para carregar mais chamados
     if (user.role === 'admin') {
-      chamadosQuery = query(listRef, orderBy('created', 'desc'), startAfter(lastDocs), limit(5)); // Administrador carrega todos
+      chamadosQuery = query(listRef, orderBy('created', 'desc'), startAfter(lastDocs), limit(5));
     } else {
       const userId = user.uid;
-      chamadosQuery = query(listRef, where('userId', '==', userId), orderBy('created', 'desc'), startAfter(lastDocs), limit(5)); // Usuário carrega apenas os seus chamados
+      chamadosQuery = query(listRef, where('userId', '==', userId), orderBy('created', 'desc'), startAfter(lastDocs), limit(5));
     }
 
     const querySnapshot = await getDocs(chamadosQuery);
     await updateState(querySnapshot);
+  }
+
+  async function handleDelete(chamadoId) {
+    const confirmDelete = window.confirm("Você tem certeza que deseja deletar este chamado?");
+    if (confirmDelete) {
+      await deleteDoc(doc(db, "chamados", chamadoId)); // Deletando o documento no Firestore
+      setChamados(chamados.filter(item => item.id !== chamadoId)); // Atualizando a lista localmente
+    }
   }
 
   function toggleModal(item) {
@@ -146,12 +156,12 @@ export default function Dashboard() {
                     <th scope="col">Assunto</th>
                     <th scope="col">Status</th>
                     <th scope="col">Cadastrando em</th>
-                    <th scope="col">#</th>
+                    <th scope="col">Ações</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {chamados.map((item, index) => (
-                    <tr key={item.id}> {/* Use o id como chave */}
+                  {chamados.map((item) => (
+                    <tr key={item.id}>
                       <td data-label="Cliente">{item.cliente}</td>
                       <td data-label="Assunto">{item.assunto}</td>
                       <td data-label="Status">
@@ -160,13 +170,18 @@ export default function Dashboard() {
                         </span>
                       </td>
                       <td data-label="Cadastrado">{item.createdFormat}</td>
-                      <td data-label="#">
+                      <td data-label="Ações">
                         <button className="action" style={{ backgroundColor: '#3583f6' }} onClick={() => toggleModal(item)}>
                           <FiSearch color='#FFF' size={17} />
                         </button>
                         <Link to={`/new/${item.id}`} className="action" style={{ backgroundColor: '#f6a935' }}>
                           <FiEdit2 color='#FFF' size={17} />
                         </Link>
+                        {user.role === 'admin' && ( // Botão de deletar visível apenas para administradores
+                          <button className="action" style={{ backgroundColor: '#d9534f' }} onClick={() => handleDelete(item.id)}>
+                            <FiTrash2 color='#FFF' size={17} />
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))}

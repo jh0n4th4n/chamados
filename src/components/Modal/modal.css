@@ -55,11 +55,15 @@
 }
 
 .modal span {
+  display: flex;
+  flex-direction: row;
   font-weight: bold;
   font-size: 1.1em;
 }
 
 .modal span i {
+  display: flex;
+  flex-direction: column;
   font-weight: 400;
   margin-right: 1em;
   padding: 2px 8px;

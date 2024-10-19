@@ -30,6 +30,11 @@
   flex-direction: column;
 }
 
+.action:hover{
+  transform: scale(1.1);
+  cursor: pointer;
+}
+
 table{
   border: 1px solid #CCC;
   margin: 0;
