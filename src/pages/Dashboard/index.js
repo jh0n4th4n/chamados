@@ -2,112 +2,72 @@ import { useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../../contexts/auth';
 import Header from '../../components/Header';
 import Title from '../../components/Title';
-import { FiPlus, FiMessageSquare, FiSearch, FiEdit2, FiTrash2 } from 'react-icons/fi'; // Importando o ícone de deletar
+import { FiPlus, FiMessageSquare, FiSearch, FiEdit2, FiTrash2 } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
-import { collection, getDocs, orderBy, limit, startAfter, query, where, deleteDoc, doc } from 'firebase/firestore'; // Adicionando 'doc'
+import { collection, onSnapshot, query, orderBy, where, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../../services/firebaseConnection';
 import { format } from 'date-fns';
 import Modal from '../../components/Modal';
 import './dashboard.css';
 
-
-const listRef = collection(db, "chamados");
+const INITIAL_LIMIT = 10; // Limite inicial de chamados
 
 export default function Dashboard() {
   const { logout, user } = useContext(AuthContext);
   const [chamados, setChamados] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isEmpty, setIsEmpty] = useState(false);
-  const [lastDocs, setLastDocs] = useState();
-  const [loadingMore, setLoadingMore] = useState(false);
   const [showPostModal, setShowPostModal] = useState(false);
   const [detail, setDetail] = useState();
+  const [visibleCount, setVisibleCount] = useState(INITIAL_LIMIT); // Contador de chamados visíveis
 
   useEffect(() => {
-    async function loadChamados() {
-      let chamadosQuery;
+    const listRef = collection(db, "chamados");
 
-      // Verifica se o usuário é administrador
-      if (user.role === 'admin') {
-        // Administradores veem todos os chamados
-        chamadosQuery = query(listRef, orderBy('created', 'desc'), limit(5));
-      } else {
-        // Usuários comuns veem apenas seus próprios chamados
-        const userId = user.uid;
-        chamadosQuery = query(listRef, where('userId', '==', userId), orderBy('created', 'desc'), limit(5));
-      }
-
-      const querySnapshot = await getDocs(chamadosQuery);
-      setChamados([]);
-      await updateState(querySnapshot);
-      setLoading(false);
-    }
-
-    loadChamados();
-
-    return () => { }
-  }, [user]);
-
-  async function updateState(querySnapshot) {
-    const isCollectionEmpty = querySnapshot.size === 0;
-
-    if (!isCollectionEmpty) {
-      let lista = [];
-
-      querySnapshot.forEach((doc) => {
-        lista.push({
-          id: doc.id,
-          usuario: doc.data().usuario || user.nome,
-          assunto: doc.data().assunto,
-          cliente: doc.data().cliente,
-          clienteId: doc.data().clienteId,
-          created: doc.data().created,
-          createdFormat: format(doc.data().created.toDate(), 'dd/MM/yyyy HH:mm:ss a'),
-          status: doc.data().status,
-          complemento: doc.data().complemento,
-        });
+    // Função para escutar alterações em tempo real
+    const unsubscribe = onSnapshot(query(listRef, orderBy('created', 'desc')), (snapshot) => {
+      const lista = [];
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        
+        // Inclui apenas chamados dos usuários comuns (se você tem alguma lógica para identificar)
+        if (data.userId !== user.uid || user.role === 'admin') {
+          lista.push({
+            id: doc.id,
+            usuario: data.usuario || user.nome,
+            assunto: data.assunto,
+            cliente: data.cliente,
+            clienteId: data.clienteId,
+            created: data.created,
+            createdFormat: format(data.created.toDate(), 'dd/MM/yyyy HH:mm:ss a'),
+            status: data.status,
+            complemento: data.complemento,
+          });
+        }
       });
 
-      const lastDoc = querySnapshot.docs[querySnapshot.docs.length - 1];
+      setChamados(lista);
+      setLoading(false);
+      setIsEmpty(lista.length === 0); // Define isEmpty baseado na lista de chamados
+    });
 
-      setChamados(chamados => [...chamados, ...lista]);
-      setLastDocs(lastDoc);
-    } else {
-      setIsEmpty(true);
-    }
-
-    setLoadingMore(false);
-  }
-
-  async function handleMore() {
-    if (loadingMore) return;
-
-    setLoadingMore(true);
-    let chamadosQuery;
-
-    // Verifica se o usuário é administrador para carregar mais chamados
-    if (user.role === 'admin') {
-      chamadosQuery = query(listRef, orderBy('created', 'desc'), startAfter(lastDocs), limit(5));
-    } else {
-      const userId = user.uid;
-      chamadosQuery = query(listRef, where('userId', '==', userId), orderBy('created', 'desc'), startAfter(lastDocs), limit(5));
-    }
-
-    const querySnapshot = await getDocs(chamadosQuery);
-    await updateState(querySnapshot);
-  }
+    return () => unsubscribe(); // Limpa o listener ao desmontar o componente
+  }, [user]);
 
   async function handleDelete(chamadoId) {
     const confirmDelete = window.confirm("Você tem certeza que deseja deletar este chamado?");
     if (confirmDelete) {
       await deleteDoc(doc(db, "chamados", chamadoId)); // Deletando o documento no Firestore
-      setChamados(chamados.filter(item => item.id !== chamadoId)); // Atualizando a lista localmente
     }
   }
 
   function toggleModal(item) {
     setShowPostModal(!showPostModal);
     setDetail(item);
+  }
+
+  function handleLoadMore() {
+    setVisibleCount((prev) => prev + INITIAL_LIMIT); // Aumenta o número de chamados visíveis
   }
 
   if (loading) {
@@ -160,7 +120,7 @@ export default function Dashboard() {
                   </tr>
                 </thead>
                 <tbody>
-                  {chamados.map((item) => (
+                  {chamados.slice(0, visibleCount).map((item) => (
                     <tr key={item.id}>
                       <td data-label="Cliente">{item.cliente}</td>
                       <td data-label="Assunto">{item.assunto}</td>
@@ -177,7 +137,7 @@ export default function Dashboard() {
                         <Link to={`/new/${item.id}`} className="action" style={{ backgroundColor: '#f6a935' }}>
                           <FiEdit2 color='#FFF' size={17} />
                         </Link>
-                        {user.role === 'admin' && ( // Botão de deletar visível apenas para administradores
+                        {user.role === 'admin' && (
                           <button className="action" style={{ backgroundColor: '#d9534f' }} onClick={() => handleDelete(item.id)}>
                             <FiTrash2 color='#FFF' size={17} />
                           </button>
@@ -187,8 +147,9 @@ export default function Dashboard() {
                   ))}
                 </tbody>
               </table>
-              {loadingMore && <h3>Buscando mais chamados...</h3>}
-              {!loadingMore && !isEmpty && <button className="btn-more" onClick={handleMore}>Buscar mais</button>}
+              {visibleCount < chamados.length && ( // Verifica se há mais chamados para carregar
+                <button className="btn-more" onClick={handleLoadMore}>Buscar mais</button>
+              )}
             </>
           )}
         </>
