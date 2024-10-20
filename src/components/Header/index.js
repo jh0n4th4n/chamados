@@ -1,18 +1,17 @@
-import { useContext } from 'react'
-import avatarImg from '../../assets/avatar.png'
-import { Link } from 'react-router-dom'
-
-import { AuthContext } from '../../contexts/auth'
-import { FiHome, FiUser, FiSettings, FiSlack  } from 'react-icons/fi'
+import { useContext } from 'react';
+import avatarImg from '../../assets/avatar.png';
+import { Link } from 'react-router-dom';
+import { AuthContext } from '../../contexts/auth';
+import { FiHome, FiUser, FiSettings, FiSlack } from 'react-icons/fi';
 import './header.css';
 
-export default function Header(){
+export default function Header() {
   const { user } = useContext(AuthContext);
 
-  return(
+  return (
     <div className="sidebar">
       <div>
-        <img src={user.avatarUrl === null ? avatarImg : user.avatarUrl} alt="Foto do usuario" />
+        <img src={user.avatarUrl === null ? avatarImg : user.avatarUrl} alt="Foto do usuário" />
       </div>
 
       <Link to="/dashboard">
@@ -20,20 +19,26 @@ export default function Header(){
         Chamados
       </Link>
 
-      <Link to="/customers">
-        <FiUser color="#FFF" size={24} />
-        Clientes
-      </Link>
+      {/* Renderiza o link para Clientes apenas se o usuário for admin */}
+      {user && user.role === 'admin' && (
+        <Link to="/customers">
+          <FiUser color="#FFF" size={24} />
+          Clientes
+        </Link>
+      )}
 
-      <Link to="/graphs">
-        <FiSlack   color="#FFF" size={24} />
-        Graficos
-      </Link>
-      
+      {/* Renderiza o link para Gráficos apenas se o usuário for admin */}
+      {user && user.role === 'admin' && (
+        <Link to="/graphs">
+          <FiSlack color="#FFF" size={24} />
+          Gráficos
+        </Link>
+      )}
+
       <Link to="/profile">
         <FiSettings color="#FFF" size={24} />
         Perfil
       </Link>
     </div>
-  )
+  );
 }
