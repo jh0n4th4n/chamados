@@ -44,7 +44,7 @@ function AuthProvider({ children }) {
 
       setUser(data);
       storageUser(data);
-      toast.success("Bem-vindo(a) de volta!");
+      toast.success(`Bem-vindo(a) de volta!`);
       navigate("/dashboard");
     } catch (error) {
       console.error(error);

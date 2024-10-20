@@ -2,14 +2,11 @@ import { useState, useEffect, useContext } from 'react';
 import Header from '../../components/Header';
 import Title from '../../components/Title';
 import { FiPlusCircle } from 'react-icons/fi';
-
 import { AuthContext } from '../../contexts/auth';
 import { db } from '../../services/firebaseConnection';
 import { collection, getDocs, getDoc, doc, addDoc, updateDoc } from 'firebase/firestore';
-
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-
 import './new.css';
 
 const listRef = collection(db, "customers");
@@ -22,10 +19,9 @@ export default function New() {
   const [customers, setCustomers] = useState([]);
   const [loadCustomer, setLoadCustomer] = useState(true);
   const [customerSelected, setCustomerSelected] = useState(0);
-
   const [complemento, setComplemento] = useState('');
   const [assunto, setAssunto] = useState('Suporte');
-  const [status, setStatus] = useState('Aberto');
+  const [status, setStatus] = useState('Aberto'); // Inicialmente definido como 'Aberto'
   const [idCustomer, setIdCustomer] = useState(false);
 
   // Lista de assuntos relacionados a TI
@@ -195,36 +191,41 @@ export default function New() {
               ))}
             </select>
 
-            <label>Status</label>
-            <div className="status">
-              <input
-                type="radio"
-                name="radio"
-                value="Aberto"
-                onChange={handleOptionChange}
-                checked={status === 'Aberto'}
-              />
-              <span>Em aberto</span>
+            {/* Verifica se o usuário é administrador antes de renderizar as opções de status */}
+            {user.role === 'admin' && (
+              <>
+                <label>Status</label>
+                <div className="status">
+                  <input
+                    type="radio"
+                    name="radio"
+                    value="Aberto"
+                    onChange={handleOptionChange}
+                    checked={status === 'Aberto'}
+                  />
+                  <span>Em aberto</span>
 
-              <input
-              className='status'
-                type="radio"
-                name="radio"
-                value="Progresso"
-                onChange={handleOptionChange}
-                checked={status === 'Progresso'}
-              />
-              <span>Progresso</span>
+                  <input
+                    className='status'
+                    type="radio"
+                    name="radio"
+                    value="Progresso"
+                    onChange={handleOptionChange}
+                    checked={status === 'Progresso'}
+                  />
+                  <span>Progresso</span>
 
-              <input
-                type="radio"
-                name="radio"
-                value="Atendido"
-                onChange={handleOptionChange}
-                checked={status === 'Atendido'}
-              />
-              <span>Atendido</span>
-            </div>
+                  <input
+                    type="radio"
+                    name="radio"
+                    value="Atendido"
+                    onChange={handleOptionChange}
+                    checked={status === 'Atendido'}
+                  />
+                  <span>Atendido</span>
+                </div>
+              </>
+            )}
 
             <label>Descrição do Chamado</label>
             <textarea
@@ -232,6 +233,7 @@ export default function New() {
               placeholder="Descreva seu problema."
               value={complemento}
               onChange={(e) => setComplemento(e.target.value)}
+              required // Adicionei 'required' para garantir que o campo não esteja vazio, se necessário
             />
 
             <button type="submit">Registrar</button>

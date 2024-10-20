@@ -4,7 +4,7 @@ import Header from '../../components/Header';
 import Title from '../../components/Title';
 import { FiPlus, FiMessageSquare, FiSearch, FiEdit2, FiTrash2 } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
-import { collection, onSnapshot, query, orderBy, where, deleteDoc, doc } from 'firebase/firestore';
+import { collection, onSnapshot, query, orderBy, deleteDoc, doc, addDoc } from 'firebase/firestore';
 import { db } from '../../services/firebaseConnection';
 import { format } from 'date-fns';
 import Modal from '../../components/Modal';
@@ -20,35 +20,51 @@ export default function Dashboard() {
   const [showPostModal, setShowPostModal] = useState(false);
   const [detail, setDetail] = useState();
   const [visibleCount, setVisibleCount] = useState(INITIAL_LIMIT); // Contador de chamados visíveis
+  const [notifications, setNotifications] = useState([]); // Estado para notificações
 
   useEffect(() => {
     const listRef = collection(db, "chamados");
 
-    // Função para escutar alterações em tempo real
     const unsubscribe = onSnapshot(query(listRef, orderBy('created', 'desc')), (snapshot) => {
       const lista = [];
       snapshot.forEach((doc) => {
         const data = doc.data();
-        
-        // Inclui apenas chamados dos usuários comuns (se você tem alguma lógica para identificar)
-        if (data.userId !== user.uid || user.role === 'admin') {
-          lista.push({
-            id: doc.id,
-            usuario: data.usuario || user.nome,
-            assunto: data.assunto,
-            cliente: data.cliente,
-            clienteId: data.clienteId,
-            created: data.created,
-            createdFormat: format(data.created.toDate(), 'dd/MM/yyyy HH:mm:ss a'),
-            status: data.status,
-            complemento: data.complemento,
-          });
+
+        // Inclui todos os chamados para usuários comuns e todos os chamados para administradores
+        lista.push({
+          id: doc.id,
+          usuario: data.usuario || user.nome,
+          assunto: data.assunto,
+          cliente: data.cliente,
+          clienteId: data.clienteId,
+          created: data.created,
+          createdFormat: format(data.created.toDate(), 'dd/MM/yyyy HH:mm:ss a'),
+          status: data.status,
+          complemento: data.complemento,
+        });
+
+        // Notifica o usuário comum sobre alterações nos chamados que ele criou
+        if (user.role === 'common' && data.userId === user.uid) {
+          setNotifications(prev => [...prev, `O chamado "${data.assunto}" foi atualizado!`]);
         }
       });
 
-      setChamados(lista);
+      // Não filtrar a lista para o usuário comum
+      console.log('Lista completa:', lista); // Log para verificar a lista completa
+
+      // Ordena a lista com base no status desejado
+      const orderedLista = lista.sort((a, b) => {
+        const statusOrder = {
+          'Aberto': 1,
+          'Em Progresso': 2,
+          'Atendido': 3
+        };
+        return statusOrder[a.status] - statusOrder[b.status];
+      });
+
+      setChamados(orderedLista);
       setLoading(false);
-      setIsEmpty(lista.length === 0); // Define isEmpty baseado na lista de chamados
+      setIsEmpty(orderedLista.length === 0); // Define isEmpty baseado na lista de chamados
     });
 
     return () => unsubscribe(); // Limpa o listener ao desmontar o componente
@@ -68,6 +84,22 @@ export default function Dashboard() {
 
   function handleLoadMore() {
     setVisibleCount((prev) => prev + INITIAL_LIMIT); // Aumenta o número de chamados visíveis
+  }
+
+  async function addChamado(chamado) {
+    const docRef = await addDoc(collection(db, "chamados"), {
+      ...chamado,
+      userId: user.uid, // Adicione o userId aqui para que o chamado seja associado ao usuário logado
+      created: new Date(),
+    });
+    setChamados((prev) => [
+      ...prev,
+      {
+        ...chamado,
+        id: docRef.id,
+        createdFormat: format(new Date(), 'dd/MM/yyyy HH:mm:ss a'), // Formatação da data
+      },
+    ]);
   }
 
   if (loading) {
@@ -94,8 +126,17 @@ export default function Dashboard() {
           <FiMessageSquare size={25} />
         </Title>
 
+        {/* Exibir notificações na parte superior da tela */}
+        {notifications.length > 0 && (
+          <div className="notifications">
+            {notifications.map((notification, index) => (
+              <div key={index} className="notification">{notification}</div>
+            ))}
+          </div>
+        )}
+
         <>
-          {chamados.length === 0 ? (
+          {isEmpty ? (
             <div className="container dashboard">
               <span>Nenhum chamado encontrado...</span>
               <Link to="/new" className="new">
@@ -115,7 +156,7 @@ export default function Dashboard() {
                     <th scope="col">Cliente</th>
                     <th scope="col">Assunto</th>
                     <th scope="col">Status</th>
-                    <th scope="col">Cadastrando em</th>
+                    <th scope="col">Cadastrado em</th>
                     <th scope="col">Ações</th>
                   </tr>
                 </thead>
@@ -125,7 +166,7 @@ export default function Dashboard() {
                       <td data-label="Cliente">{item.cliente}</td>
                       <td data-label="Assunto">{item.assunto}</td>
                       <td data-label="Status">
-                        <span className="badge" style={{ backgroundColor: item.status === 'Aberto' ? '#5cb85c' : '#999' }}>
+                        <span className="badge" style={{ backgroundColor: item.status === 'Aberto' ? '#5cb85c' : item.status === 'Atendido' ? '#999999' : '#f0ad4e' }}>
                           {item.status}
                         </span>
                       </td>
@@ -134,9 +175,9 @@ export default function Dashboard() {
                         <button className="action" style={{ backgroundColor: '#3583f6' }} onClick={() => toggleModal(item)}>
                           <FiSearch color='#FFF' size={17} />
                         </button>
-                        <button to={`/new/${item.id}`} className="action" style={{ backgroundColor: '#f6a935' }}>
+                        <Link to={`/new/${item.id}`} className="action" style={{ backgroundColor: '#f6a935' }}>
                           <FiEdit2 color='#FFF' size={17} />
-                        </button>
+                        </Link>
                         {user.role === 'admin' && (
                           <button className="action" style={{ backgroundColor: '#d9534f' }} onClick={() => handleDelete(item.id)}>
                             <FiTrash2 color='#FFF' size={17} />
