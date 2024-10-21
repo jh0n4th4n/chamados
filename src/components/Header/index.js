@@ -2,7 +2,7 @@ import { useContext } from 'react';
 import avatarImg from '../../assets/avatar.png';
 import { Link } from 'react-router-dom';
 import { AuthContext } from '../../contexts/auth';
-import { FiHome, FiUser, FiSettings, FiSlack } from 'react-icons/fi';
+import { FiHome, FiUser, FiSettings, FiSlack,FiUsers  } from 'react-icons/fi';
 import './header.css';
 
 export default function Header() {
@@ -24,6 +24,14 @@ export default function Header() {
         <Link to="/customers">
           <FiUser color="#FFF" size={24} />
           Clientes
+        </Link>
+      )}
+
+        {/* Renderiza o link para Clientes apenas se o usuário for admin */}
+        {user && user.role === 'admin' && (
+        <Link to="/users">
+          <FiUsers color="#FFF" size={24} />
+          Usuarios
         </Link>
       )}
 

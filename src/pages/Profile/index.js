@@ -108,18 +108,20 @@ export default function Profile() {
 
         <div className="container">
           <form className="form-profile" onSubmit={handleSubmit}>
-            <label className="label-avatar">
-              <span>
-                <FiUpload color="#FFF" size={25} />
-              </span>
+          <label className="label-avatar">
+  <span>
+    <FiUpload color="#FFF" size={25} />
+  </span>
 
-              <input type="file" accept="image/*" onChange={handleFile} /> <br />
-              {avatarUrl === '' ? (
-                <img src={avatar} alt="Foto de perfil" className="profile-img" />
-              ) : (
-                <img src={avatarUrl} alt="Foto de perfil" className="profile-img" />
-              )}
-            </label>
+  <input type="file" accept="image/*" onChange={handleFile} /> <br />
+
+  {avatarUrl ? (
+    <img src={avatarUrl} alt="Foto de perfil" className="profile-img" />
+  ) : (
+    <img src={avatar} alt="Foto de perfil" className="profile-img" />
+  )}
+</label>
+
 
             <label>Nome</label>
             <input type="text" value={nome} onChange={(e) => setNome(e.target.value)} />

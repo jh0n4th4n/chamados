@@ -9,6 +9,7 @@ import New from '../pages/New';
 
 import Private from './Private';
 import Graphs from '../pages/Graficos';
+import Users from '../pages/Usuarios';
 
 function RoutesApp() {
   return (
@@ -21,6 +22,8 @@ function RoutesApp() {
       <Route path="/profile" element={<Private><Profile /></Private>} />
 
       <Route path="/customers" element={<Private><Customers /></Private>} />
+      
+      <Route path="/users" element={<Private><Users /></Private>} />
 
       <Route path="/new" element={<Private><New /></Private>} />
 
