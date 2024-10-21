@@ -1,0 +1,78 @@
+.container{
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.formProfile{
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.formProfile label{
+  font-size: 1.2em;
+  margin-right: 10px;
+  text-align: center;
+}
+
+.formProfile select{
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  font-size: 1.2em;
+  margin-bottom: 10px;
+  outline: none;
+}
+
+.formProfile input{
+  width: 100%;
+  text-align: center;
+  padding: 5px;
+  border: none;
+  border-radius: 10px;
+  font-size: 1em;
+  margin-bottom: 10px;
+  outline: none;
+}
+
+.formProfile button{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #0125f3;
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-left: 10px;
+  font-size: 1.2em;
+  transition: background-color 0.3s ease;
+  &:hover{
+    background-color: #001875;
+  }
+
+}
+
+.tableContainer{
+  width: 100%;
+  
+}
+
+
+.action{
+  border:0;
+  padding: 5px;
+  border-radius: 4px;
+  display: inline-block;
+  margin-right: 3px;
+}
+
+.action:hover{
+  transform: scale(1.1);
+  cursor: pointer;
+}
