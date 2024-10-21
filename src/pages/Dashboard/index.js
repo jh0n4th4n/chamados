@@ -30,7 +30,7 @@ export default function Dashboard() {
       snapshot.forEach((doc) => {
         const data = doc.data();
 
-        // Inclui todos os chamados para usuários comuns e todos os chamados para administradores
+        // Inclui todos os chamados na lista
         lista.push({
           id: doc.id,
           usuario: data.usuario || user.nome,
@@ -41,6 +41,7 @@ export default function Dashboard() {
           createdFormat: format(data.created.toDate(), 'dd/MM/yyyy HH:mm:ss a'),
           status: data.status,
           complemento: data.complemento,
+          userId: data.userId, // Salva o userId do chamado
         });
 
         // Notifica o usuário comum sobre alterações nos chamados que ele criou
@@ -48,9 +49,6 @@ export default function Dashboard() {
           setNotifications(prev => [...prev, `O chamado "${data.assunto}" foi atualizado!`]);
         }
       });
-
-      // Não filtrar a lista para o usuário comum
-      console.log('Lista completa:', lista); // Log para verificar a lista completa
 
       // Ordena a lista com base no status desejado
       const orderedLista = lista.sort((a, b) => {
@@ -175,10 +173,12 @@ export default function Dashboard() {
                         <button className="action" style={{ backgroundColor: '#3583f6' }} onClick={() => toggleModal(item)}>
                           <FiSearch color='#FFF' size={17} />
                         </button>
-                        <Link to={`/new/${item.id}`} className="action" style={{ backgroundColor: '#f6a935' }}>
-                          <FiEdit2 color='#FFF' size={17} />
-                        </Link>
-                        {user.role === 'admin' && (
+                        {(user.role === 'admin' || item.userId === user.uid) && ( // Adiciona a condição para administradores
+                          <Link to={`/new/${item.id}`} className="action" style={{ backgroundColor: '#f6a935' }}>
+                            <FiEdit2 color='#FFF' size={17} />
+                          </Link>
+                        )}
+                        {user.role === 'admin' && ( // Apenas administradores podem deletar
                           <button className="action" style={{ backgroundColor: '#d9534f' }} onClick={() => handleDelete(item.id)}>
                             <FiTrash2 color='#FFF' size={17} />
                           </button>

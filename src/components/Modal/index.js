@@ -120,11 +120,11 @@ export default function Modal({ conteudo, close }) {
               </span>
             </div>
 
-            <div className="row">
+            {/* <div className="row">
               <span>
-                Usuário: <i>{conteudo.usuario}</i>
+                Usuário: <i>{conteudo.nome || 'Em Desenvolvimento' }</i>
               </span>
-            </div>
+            </div> */}
 
             <div className="row">
               <span>
