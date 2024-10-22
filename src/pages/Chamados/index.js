@@ -8,7 +8,7 @@ import { collection, onSnapshot, query, orderBy, deleteDoc, doc, addDoc } from '
 import { db } from '../../services/firebaseConnection';
 import { format } from 'date-fns';
 import Modal from '../../components/Modal';
-import './dashboard.css';
+import './chamados.css';
 
 const INITIAL_LIMIT = 10; // Limite inicial de chamados
 
