@@ -6,7 +6,6 @@ import Chamados from '../pages/Chamados';
 import Profile from '../pages/Profile';
 import Customers from '../pages/Customers';
 import New from '../pages/New';
-
 import Private from './Private';
 import Graphs from '../pages/Graficos';
 import Users from '../pages/Usuarios';

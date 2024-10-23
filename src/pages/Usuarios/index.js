@@ -1,15 +1,17 @@
 import { useState, useEffect } from 'react';
 import Header from '../../components/Header';
 import Title from '../../components/Title';
-import { FiUser, FiEdit2, FiTrash2 } from 'react-icons/fi';
+import { FiUser, FiEdit2, FiTrash2, FiLock } from 'react-icons/fi';
 import { db } from '../../services/firebaseConnection';
 import { addDoc, collection, onSnapshot, deleteDoc, doc, setDoc } from 'firebase/firestore';
 import { toast } from 'react-toastify';
-import styles from './users.module.css'; // CSS Module para estilização
+import styles from './users.module.css';
+import { getAuth, createUserWithEmailAndPassword, sendPasswordResetEmail, deleteUser } from "firebase/auth"; // Importando funções para autenticação
 
 export default function Users() {
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState(''); // Campo de senha
   const [role, setRole] = useState('');
   const [loading, setLoading] = useState(false);
   const [usuarios, setUsuarios] = useState([]);
@@ -19,10 +21,12 @@ export default function Users() {
   async function handleRegister(e) {
     e.preventDefault();
 
-    if (nome !== '' && email !== '' && role !== '') {
+    if (nome !== '' && email !== '' && role !== '' && password !== '') {
       setLoading(true);
 
       try {
+        const auth = getAuth();
+
         if (editId) {
           // Atualiza usuário existente
           await setDoc(doc(db, "users", editId), {
@@ -32,18 +36,22 @@ export default function Users() {
           });
           toast.success("Usuário atualizado com sucesso!");
         } else {
-          // Adiciona novo usuário
-          await addDoc(collection(db, "users"), {
+          // Cria o usuário no Firebase Authentication e salva no Firestore
+          const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+          const uid = userCredential.user.uid;
+
+          await setDoc(doc(db, "users", uid), {
             nome,
             email,
             role,
           });
-          toast.success("Usuário cadastrado com sucesso!");
+          toast.success("Usuário cadastrado com sucesso no sistema!");
         }
 
         // Limpa os campos após o cadastro
         setNome('');
         setEmail('');
+        setPassword(''); // Limpa o campo de senha
         setRole('');
         setEditId(null);
       } catch (error) {
@@ -70,12 +78,30 @@ export default function Users() {
     return () => unsubscribe();
   }, []);
 
-  // Função para deletar um usuário
-  async function handleDelete(id) {
+  // Função para deletar um usuário do Firestore e Authentication
+  async function handleDelete(id, email) {
     const confirmDelete = window.confirm("Tem certeza que deseja excluir este usuário?");
     if (confirmDelete) {
-      await deleteDoc(doc(db, "users", id));
-      toast.success("Usuário excluído com sucesso!");
+      try {
+        const auth = getAuth();
+
+        // Primeiro, deletar do Firestore
+        await deleteDoc(doc(db, "users", id));
+
+        // Agora, buscar o usuário no Firebase Authentication
+        const user = auth.currentUser;
+
+        // Autenticar com o email para deletar o usuário correspondente
+        if (user && user.email === email) {
+          await deleteUser(user);
+          toast.success("Usuário excluído com sucesso!");
+        } else {
+          toast.error("Erro ao excluir o usuário de autenticação.");
+        }
+      } catch (error) {
+        toast.error("Erro ao excluir o usuário.");
+        console.log(error);
+      }
     }
   }
 
@@ -85,6 +111,18 @@ export default function Users() {
     setEmail(usuario.email);
     setRole(usuario.role);
     setEditId(usuario.id);
+  }
+
+  // Função para redefinir a senha
+  async function handleResetPassword(email) {
+    const auth = getAuth();
+    try {
+      await sendPasswordResetEmail(auth, email);
+      toast.success("E-mail de redefinição de senha enviado com sucesso!");
+    } catch (error) {
+      toast.error("Erro ao enviar e-mail de redefinição de senha.");
+      console.log(error);
+    }
   }
 
   return (
@@ -114,6 +152,15 @@ export default function Users() {
                 placeholder="Digite o email do usuário"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+              />
+            </label>
+
+            <label>Senha do Usuário {/* Campo de senha para autenticação */}
+              <input
+                type="password"
+                placeholder="Digite uma senha"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
               />
             </label>
 
@@ -154,8 +201,11 @@ export default function Users() {
                       <button className={styles.action} style={{ backgroundColor: '#f6a935' }} onClick={() => handleEdit(usuario)}>
                         <FiEdit2 color='#FFF' size={17} />
                       </button>
-                      <button className={styles.action} style={{ backgroundColor: '#d9534f' }} onClick={() => handleDelete(usuario.id)}>
+                      <button className={styles.action} style={{ backgroundColor: '#d9534f' }} onClick={() => handleDelete(usuario.id, usuario.email)}>
                         <FiTrash2 color='#FFF' size={17} />
+                      </button>
+                      <button className={styles.action} style={{ backgroundColor: '#5bc0de' }} onClick={() => handleResetPassword(usuario.email)}>
+                        <FiLock color='#FFF' size={17} /> {/* Ícone de redefinir senha */}
                       </button>
                     </td>
                   </tr>

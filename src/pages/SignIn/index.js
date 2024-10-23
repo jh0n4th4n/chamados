@@ -1,9 +1,7 @@
-import { useState, useContext } from 'react'
-import './signin.css'
-
-import logo from '../../assets/logo 3.png'
-import { Link } from 'react-router-dom'
-import { AuthContext } from '../../contexts/auth'
+import { useState, useContext } from 'react';
+import './signin.css';
+import logo from '../../assets/logo 3.png';
+import { AuthContext } from '../../contexts/auth';
 
 
 export default function SignIn() {
@@ -49,8 +47,6 @@ export default function SignIn() {
             {loadingAuth ? "Carregando..." : "Acessar"}
           </button>
         </form>
-
-        <Link to="/register">Criar uma conta</Link>
 
       </div>
     </div>

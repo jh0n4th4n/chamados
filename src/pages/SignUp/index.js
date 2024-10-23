@@ -23,8 +23,8 @@ export default function SignUp() {
 
   // Definindo os papéis disponíveis
   const roles = {
-    admin: 'Administrador',
-    user: 'Usuário'
+    admin: 'admin',
+    user: 'user'
   };
 
   async function handleSubmit(e) {

@@ -12,8 +12,8 @@ import './chamados.css';
 
 const INITIAL_LIMIT = 10; // Limite inicial de chamados
 
-export default function Dashboard() {
-  const { logout, user } = useContext(AuthContext);
+export default function Chamados() {
+  const { user } = useContext(AuthContext);
   const [chamados, setChamados] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isEmpty, setIsEmpty] = useState(false);

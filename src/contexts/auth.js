@@ -1,6 +1,12 @@
 import { useState, createContext, useEffect } from 'react';
 import { auth, db } from '../services/firebaseConnection';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from 'firebase/auth';
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  updatePassword,
+  sendPasswordResetEmail,
+} from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -38,8 +44,9 @@ function AuthProvider({ children }) {
         uid: uid,
         nome: docSnap.data().nome,
         email: value.user.email,
+        telefone: docSnap.data().telefone,
         avatarUrl: docSnap.data().avatarUrl,
-        role: docSnap.data().role,  // Adicionando o papel do usuário
+        role: docSnap.data().role,
       };
 
       setUser(data);
@@ -54,8 +61,8 @@ function AuthProvider({ children }) {
     }
   }
 
-  // Função para cadastro de usuário com campo 'role'
-  async function signUp(email, password, name, setor, role = 'user') {
+  // Função para cadastro de usuário com campos adicionais
+  async function signUp(email, password, name, telefone, setor, role = 'user') {
     setLoadingAuth(true);
     try {
       const value = await createUserWithEmailAndPassword(auth, email, password);
@@ -63,18 +70,20 @@ function AuthProvider({ children }) {
 
       await setDoc(doc(db, "users", uid), {
         nome: name,
+        telefone: telefone,
         avatarUrl: null,
         email: email,
         setor: setor,
-        role: role,  // Salvando o papel do usuário
+        role: role,
       });
 
       const data = {
         uid: uid,
         nome: name,
+        telefone: telefone,
         email: value.user.email,
         avatarUrl: null,
-        role: role,  // Adicionando o papel do usuário no estado
+        role: role,
       };
 
       setUser(data);
@@ -89,6 +98,48 @@ function AuthProvider({ children }) {
     }
   }
 
+  // Função para atualizar a senha do usuário
+  async function updateUserPassword(newPassword) {
+    if (!user) {
+      toast.error("Usuário não autenticado!");
+      return;
+    }
+    
+    setLoadingAuth(true);
+    try {
+      const userAuth = auth.currentUser;
+      await updatePassword(userAuth, newPassword);
+      
+      // Atualiza a senha no Firestore (opcional)
+      await setDoc(doc(db, "users", user.uid), {
+        ...user,
+        senha: newPassword,
+      }, { merge: true });
+
+      toast.success("Senha atualizada com sucesso!");
+      logout();
+    } catch (error) {
+      console.error(error);
+      toast.error("Erro ao atualizar a senha. Tente novamente!");
+    } finally {
+      setLoadingAuth(false);
+    }
+  }
+
+  // Função para redefinir a senha do usuário
+  async function resetPassword(email) {
+    setLoadingAuth(true);
+    try {
+      await sendPasswordResetEmail(auth, email);
+      toast.success("E-mail de redefinição de senha enviado com sucesso!");
+    } catch (error) {
+      console.error(error);
+      toast.error("Erro ao enviar o e-mail de redefinição de senha. Tente novamente!");
+    } finally {
+      setLoadingAuth(false);
+    }
+  }
+
   function storageUser(data) {
     localStorage.setItem('@ticketsPRO', JSON.stringify(data));
   }
@@ -97,7 +148,7 @@ function AuthProvider({ children }) {
     await signOut(auth);
     localStorage.removeItem('@ticketsPRO');
     setUser(null);
-    navigate("/"); // Navegar para a página inicial após logout
+    navigate("/");
   }
 
   return (
@@ -107,6 +158,8 @@ function AuthProvider({ children }) {
         user,
         signIn,
         signUp,
+        updateUserPassword,
+        resetPassword, // Adiciona a função de redefinição de senha
         logout,
         loadingAuth,
         loading,
