@@ -159,7 +159,7 @@ function AuthProvider({ children }) {
         signIn,
         signUp,
         updateUserPassword,
-        resetPassword, // Adiciona a função de redefinição de senha
+        resetPassword,
         logout,
         loadingAuth,
         loading,

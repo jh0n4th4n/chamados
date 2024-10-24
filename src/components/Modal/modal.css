@@ -43,7 +43,7 @@
   background-color: #0003ab;
   position: absolute;
   top: 15px;
-  left: 120px; /* Deslocamento à direita do botão "Voltar" */
+  left: 120px;
 }
 
 .close svg {

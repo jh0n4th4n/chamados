@@ -63,9 +63,9 @@ export default function Customers() {
       }));
       setClientes(clientesList);
     });
-
+    
     return () => unsubscribe();
-  }, []);
+  }, [user]);
 
   async function handleDelete(id) {
     const confirmDelete = window.confirm("Tem certeza que deseja excluir este cliente?");
