@@ -2,7 +2,7 @@ import { useContext } from 'react';
 import avatarImg from '../../assets/avatar.png';
 import { Link } from 'react-router-dom';
 import { AuthContext } from '../../contexts/auth';
-import { FiHome, FiUser, FiSettings, FiSlack,FiUsers  } from 'react-icons/fi';
+import { FiHome, FiUser, FiSettings, FiSlack, FiUsers, FiMessageCircle } from 'react-icons/fi';
 import './header.css';
 
 export default function Header() {
@@ -27,11 +27,11 @@ export default function Header() {
         </Link>
       )}
 
-        {/* Renderiza o link para Clientes apenas se o usuário for admin */}
-        {user && user.role === 'admin' && (
+      {/* Renderiza o link para Usuários apenas se o usuário for admin */}
+      {user && user.role === 'admin' && (
         <Link to="/users">
           <FiUsers color="#FFF" size={24} />
-          Usuarios
+          Usuários
         </Link>
       )}
 
@@ -42,6 +42,12 @@ export default function Header() {
           Gráficos
         </Link>
       )}
+
+      {/* Link para o Chat */}
+      <Link to="/chat">
+        <FiMessageCircle color="#FFF" size={24} />
+        Chat
+      </Link>
 
       <Link to="/profile">
         <FiSettings color="#FFF" size={24} />

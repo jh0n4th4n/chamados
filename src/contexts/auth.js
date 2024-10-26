@@ -7,7 +7,7 @@ import {
   updatePassword,
   sendPasswordResetEmail,
 } from 'firebase/auth';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
@@ -30,6 +30,24 @@ function AuthProvider({ children }) {
     loadUser();
   }, []);
 
+  // Função para definir o status online do usuário
+  async function setUserOnline(uid) {
+    const userRef = doc(db, "users", uid);
+    await setDoc(userRef, {
+      status: "online",
+      lastActive: serverTimestamp(),
+    }, { merge: true });
+  }
+
+  // Função para definir o status offline do usuário
+  async function setUserOffline(uid) {
+    const userRef = doc(db, "users", uid);
+    await setDoc(userRef, {
+      status: "offline",
+      lastActive: serverTimestamp(),
+    }, { merge: true });
+  }
+
   // Função para login de usuário
   async function signIn(email, password) {
     setLoadingAuth(true);
@@ -51,6 +69,7 @@ function AuthProvider({ children }) {
 
       setUser(data);
       storageUser(data);
+      await setUserOnline(uid); // Define o usuário como online após o login
       toast.success(`Bem-vindo(a) de volta!`);
       navigate("/dashboard");
     } catch (error) {
@@ -75,6 +94,8 @@ function AuthProvider({ children }) {
         email: email,
         setor: setor,
         role: role,
+        status: "online",
+        lastActive: serverTimestamp(),
       });
 
       const data = {
@@ -145,6 +166,9 @@ function AuthProvider({ children }) {
   }
 
   async function logout() {
+    if (user) {
+      await setUserOffline(user.uid); // Define o usuário como offline antes de sair
+    }
     await signOut(auth);
     localStorage.removeItem('@ticketsPRO');
     setUser(null);
