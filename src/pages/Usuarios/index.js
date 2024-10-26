@@ -3,25 +3,24 @@ import Header from '../../components/Header';
 import Title from '../../components/Title';
 import { FiUser, FiEdit2, FiTrash2, FiLock } from 'react-icons/fi';
 import { db } from '../../services/firebaseConnection';
-import { addDoc, collection, onSnapshot, deleteDoc, doc, setDoc } from 'firebase/firestore';
+import { collection, onSnapshot, deleteDoc, doc, setDoc } from 'firebase/firestore';
 import { toast } from 'react-toastify';
 import styles from './users.module.css';
-import { getAuth, createUserWithEmailAndPassword, sendPasswordResetEmail, deleteUser } from "firebase/auth"; // Importando funções para autenticação
+import { getAuth, createUserWithEmailAndPassword, sendPasswordResetEmail, deleteUser } from "firebase/auth";
 
 export default function Users() {
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState(''); // Campo de senha
+  const [password, setPassword] = useState('');
   const [role, setRole] = useState('');
   const [loading, setLoading] = useState(false);
   const [usuarios, setUsuarios] = useState([]);
   const [editId, setEditId] = useState(null);
 
-  // Função para cadastrar ou editar usuário
   async function handleRegister(e) {
     e.preventDefault();
 
-    if (nome !== '' && email !== '' && role !== '' && password !== '') {
+    if (nome && email && role && password) {
       setLoading(true);
 
       try {
@@ -51,11 +50,11 @@ export default function Users() {
         // Limpa os campos após o cadastro
         setNome('');
         setEmail('');
-        setPassword(''); // Limpa o campo de senha
+        setPassword('');
         setRole('');
         setEditId(null);
       } catch (error) {
-        toast.error("Erro ao cadastrar usuário.");
+        toast.error("Erro ao cadastrar usuário: " + error.message);
         console.log(error);
       } finally {
         setLoading(false);
@@ -65,7 +64,6 @@ export default function Users() {
     }
   }
 
-  // Função para buscar os usuários cadastrados
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, "users"), (snapshot) => {
       const usersList = snapshot.docs.map(doc => ({
@@ -78,20 +76,14 @@ export default function Users() {
     return () => unsubscribe();
   }, []);
 
-  // Função para deletar um usuário do Firestore e Authentication
   async function handleDelete(id, email) {
     const confirmDelete = window.confirm("Tem certeza que deseja excluir este usuário?");
     if (confirmDelete) {
       try {
         const auth = getAuth();
-
-        // Primeiro, deletar do Firestore
         await deleteDoc(doc(db, "users", id));
 
-        // Agora, buscar o usuário no Firebase Authentication
         const user = auth.currentUser;
-
-        // Autenticar com o email para deletar o usuário correspondente
         if (user && user.email === email) {
           await deleteUser(user);
           toast.success("Usuário excluído com sucesso!");
@@ -99,13 +91,12 @@ export default function Users() {
           toast.error("Erro ao excluir o usuário de autenticação.");
         }
       } catch (error) {
-        toast.error("Erro ao excluir o usuário.");
+        toast.error("Erro ao excluir o usuário: " + error.message);
         console.log(error);
       }
     }
   }
 
-  // Função para editar um usuário
   function handleEdit(usuario) {
     setNome(usuario.nome);
     setEmail(usuario.email);
@@ -113,14 +104,13 @@ export default function Users() {
     setEditId(usuario.id);
   }
 
-  // Função para redefinir a senha
   async function handleResetPassword(email) {
     const auth = getAuth();
     try {
       await sendPasswordResetEmail(auth, email);
       toast.success("E-mail de redefinição de senha enviado com sucesso!");
     } catch (error) {
-      toast.error("Erro ao enviar e-mail de redefinição de senha.");
+      toast.error("Erro ao enviar e-mail de redefinição de senha: " + error.message);
       console.log(error);
     }
   }
@@ -135,7 +125,6 @@ export default function Users() {
         </Title>
 
         <div className={styles.container}>
-          {/* Formulário de Cadastro */}
           <form className={styles.formProfile} onSubmit={handleRegister}>
             <label>Nome do Usuário
               <input
@@ -143,6 +132,7 @@ export default function Users() {
                 placeholder="Digite o nome do usuário"
                 value={nome}
                 onChange={(e) => setNome(e.target.value)}
+                required
               />
             </label>
 
@@ -152,15 +142,17 @@ export default function Users() {
                 placeholder="Digite o email do usuário"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                required
               />
             </label>
 
-            <label>Senha do Usuário {/* Campo de senha para autenticação */}
+            <label>Senha do Usuário
               <input
                 type="password"
                 placeholder="Digite uma senha"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                required
               />
             </label>
 
@@ -168,6 +160,7 @@ export default function Users() {
               <select
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
+                required
               >
                 <option value="">Selecione o tipo de perfil</option>
                 <option value="admin">Admin</option>
@@ -180,7 +173,6 @@ export default function Users() {
             </button>
           </form>
 
-          {/* Tabela de Usuários */}
           <div className={styles.tableContainer}>
             <table>
               <thead>
@@ -205,7 +197,7 @@ export default function Users() {
                         <FiTrash2 color='#FFF' size={17} />
                       </button>
                       <button className={styles.action} style={{ backgroundColor: '#5bc0de' }} onClick={() => handleResetPassword(usuario.email)}>
-                        <FiLock color='#FFF' size={17} /> {/* Ícone de redefinir senha */}
+                        <FiLock color='#FFF' size={17} />
                       </button>
                     </td>
                   </tr>

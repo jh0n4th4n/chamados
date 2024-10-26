@@ -12,95 +12,90 @@ import './profile.css';
 
 export default function Profile() {
   const { user, storageUser, setUser, logout } = useContext(AuthContext);
-  
+
   const [avatarUrl, setAvatarUrl] = useState(user?.avatarUrl || '');
   const [imageAvatar, setImageAvatar] = useState(null);
-  
   const [nome, setNome] = useState(user?.nome || '');
-  const [email, setEmail] = useState(user?.email || '');
-  const [role, setRole] = useState(user?.role || ''); // Usar o role como tipo de perfil
+  const [email] = useState(user?.email || ''); // O email não deve ser editável
+  const [role] = useState(user?.role || ''); // O role não deve ser editável
 
   useEffect(() => {
     if (user) {
       setAvatarUrl(user.avatarUrl);
       setNome(user.nome);
-      setEmail(user.email);
-      setRole(user.role); // Atualiza o role
     }
   }, [user]);
 
-  function handleFile(e) {
-    if (e.target.files[0]) {
-      const image = e.target.files[0];
+  const handleFile = (e) => {
+    const image = e.target.files[0];
 
+    if (image) {
       if (image.type === 'image/jpeg' || image.type === 'image/png') {
         setImageAvatar(image);
         setAvatarUrl(URL.createObjectURL(image));
       } else {
-        alert("Envie uma imagem do tipo PNG ou JPEG");
+        toast.error("Envie uma imagem do tipo PNG ou JPEG");
         setImageAvatar(null);
-        return;
       }
     }
-  }
+  };
 
-  async function handleUpload() {
+  const handleUpload = async () => {
     const currentUid = user.uid;
     const uploadRef = ref(storage, `images/${currentUid}/${imageAvatar.name}`);
 
-    const uploadTask = uploadBytes(uploadRef, imageAvatar)
-      .then((snapshot) => {
-        getDownloadURL(snapshot.ref).then(async (downloadURL) => {
-          let urlFoto = downloadURL;
+    try {
+      const snapshot = await uploadBytes(uploadRef, imageAvatar);
+      const downloadURL = await getDownloadURL(snapshot.ref);
 
-          const docRef = doc(db, "users", user.uid);
-          await updateDoc(docRef, {
-            avatarUrl: urlFoto,
-            nome: nome,
-          })
-            .then(() => {
-              let data = {
-                ...user,
-                nome: nome,
-                avatarUrl: urlFoto,
-              };
-
-              setUser(data);
-              storageUser(data);
-              toast.success("Atualizado com sucesso!");
-            });
-        });
+      const docRef = doc(db, "users", currentUid);
+      await updateDoc(docRef, {
+        avatarUrl: downloadURL,
+        nome: nome,
       });
-  }
 
-  async function handleSubmit(e) {
+      const updatedUser = {
+        ...user,
+        nome: nome,
+        avatarUrl: downloadURL,
+      };
+
+      setUser(updatedUser);
+      storageUser(updatedUser);
+      toast.success("Atualizado com sucesso!");
+    } catch (error) {
+      toast.error("Erro ao fazer upload da imagem: " + error.message);
+    }
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (imageAvatar === null && nome !== '') {
+    try {
       const docRef = doc(db, "users", user.uid);
-      await updateDoc(docRef, {
-        nome: nome,
-      })
-        .then(() => {
-          let data = {
-            ...user,
-            nome: nome,
-          };
+      let updatedUser = { ...user };
 
-          setUser(data);
-          storageUser(data);
-          toast.success("Atualizado com sucesso!");
-        });
+      if (imageAvatar) {
+        await handleUpload();
+      } 
 
-    } else if (nome !== '' && imageAvatar !== null) {
-      handleUpload();
+      if (nome !== user.nome) { // Verifica se o nome foi alterado
+        await updateDoc(docRef, { nome: nome });
+        updatedUser.nome = nome; // Atualiza o nome no objeto user
+        toast.success("Nome atualizado com sucesso!");
+      }
+
+      setUser(updatedUser);
+      storageUser(updatedUser);
+
+    } catch (error) {
+      toast.error("Erro ao atualizar informações: " + error.message);
     }
-  }
+  };
 
   return (
     <div>
       <Header />
-
       <div className="content">
         <Title name="Minha conta">
           <FiSettings size={25} />
@@ -108,36 +103,40 @@ export default function Profile() {
 
         <div className="container">
           <form className="form-profile" onSubmit={handleSubmit}>
-          <label className="label-avatar">
-  <span>
-    <FiUpload color="#FFF" size={25} />
-  </span>
-
-  <input type="file" accept="image/*" onChange={handleFile} /> <br />
-
-  {avatarUrl ? (
-    <img src={avatarUrl} alt="Foto de perfil" className="profile-img" />
-  ) : (
-    <img src={avatar} alt="Foto de perfil" className="profile-img" />
-  )}
-</label>
-
+            <label className="label-avatar">
+              <span>
+                <FiUpload color="#FFF" size={25} />
+              </span>
+              <input type="file" accept="image/*" onChange={handleFile} />
+              <br />
+              <img
+                src={avatarUrl || avatar}
+                alt="Foto de perfil"
+                className="profile-img"
+              />
+            </label>
 
             <label>Nome</label>
-            <input type="text" value={nome} onChange={(e) => setNome(e.target.value)} />
+            <input
+              type="text"
+              value={nome}
+              onChange={(e) => setNome(e.target.value)}
+            />
 
             <label>Email</label>
-            <input type="text" value={email} disabled={true} />
+            <input type="text" value={email} disabled />
 
             <label>Tipo de Perfil</label>
-            <input type="text" value={role} disabled={true} />
+            <input type="text" value={role} disabled />
 
             <button type="submit">Salvar</button>
           </form>
         </div>
 
         <div className="container">
-          <button className="logout-btn" onClick={() => logout()}>Sair</button>
+          <button className="logout-btn" onClick={logout}>
+            Sair
+          </button>
         </div>
       </div>
     </div>

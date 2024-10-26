@@ -1,8 +1,8 @@
-import { BrowserRouter } from 'react-router-dom'
+// src/App.js
+import { BrowserRouter } from 'react-router-dom';
 import RoutesApp from './routes';
-
-import AuthProvider from './contexts/auth'
-import { ToastContainer } from 'react-toastify'
+import { ToastContainer } from 'react-toastify';
+import AuthProvider from './contexts/auth';
 import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
@@ -10,7 +10,7 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <ToastContainer autoClose={3000} />
-        <RoutesApp/>
+        <RoutesApp />
       </AuthProvider>
     </BrowserRouter>
   );

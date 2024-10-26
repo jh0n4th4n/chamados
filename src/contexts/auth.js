@@ -20,91 +20,66 @@ function AuthProvider({ children }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    async function loadUser() {
+    const loadUser = () => {
       const storageUser = localStorage.getItem('@ticketsPRO');
       if (storageUser) {
         setUser(JSON.parse(storageUser));
       }
       setLoading(false);
-    }
+    };
     loadUser();
   }, []);
 
-  // Função para definir o status online do usuário
-  async function setUserOnline(uid) {
-    const userRef = doc(db, "users", uid);
-    await setDoc(userRef, {
-      status: "online",
-      lastActive: serverTimestamp(),
-    }, { merge: true });
-  }
-
-  // Função para definir o status offline do usuário
-  async function setUserOffline(uid) {
-    const userRef = doc(db, "users", uid);
-    await setDoc(userRef, {
-      status: "offline",
-      lastActive: serverTimestamp(),
-    }, { merge: true });
-  }
-
-  // Função para login de usuário
-  async function signIn(email, password) {
+  const signIn = async (email, password) => {
     setLoadingAuth(true);
     try {
-      const value = await signInWithEmailAndPassword(auth, email, password);
-      const uid = value.user.uid;
+      const { user: firebaseUser } = await signInWithEmailAndPassword(auth, email, password);
+      const uid = firebaseUser.uid;
 
-      const docRef = doc(db, "users", uid);
-      const docSnap = await getDoc(docRef);
-
+      const userDoc = await getDoc(doc(db, "users", uid));
       const data = {
-        uid: uid,
-        nome: docSnap.data().nome,
-        email: value.user.email,
-        telefone: docSnap.data().telefone,
-        avatarUrl: docSnap.data().avatarUrl,
-        role: docSnap.data().role,
+        uid,
+        nome: userDoc.data().nome,
+        email: firebaseUser.email,
+        telefone: userDoc.data().telefone,
+        avatarUrl: userDoc.data().avatarUrl,
+        role: userDoc.data().role,
       };
 
       setUser(data);
       storageUser(data);
-      await setUserOnline(uid); // Define o usuário como online após o login
       toast.success(`Bem-vindo(a) de volta!`);
       navigate("/dashboard");
     } catch (error) {
-      console.error(error);
-      toast.error("Ops, algo deu errado!");
+      handleError(error);
     } finally {
       setLoadingAuth(false);
     }
-  }
+  };
 
-  // Função para cadastro de usuário com campos adicionais
-  async function signUp(email, password, name, telefone, setor, role = 'user') {
+  const signUp = async (email, password, name, telefone, setor, role = 'user') => {
     setLoadingAuth(true);
     try {
-      const value = await createUserWithEmailAndPassword(auth, email, password);
-      const uid = value.user.uid;
+      const { user: firebaseUser } = await createUserWithEmailAndPassword(auth, email, password);
+      const uid = firebaseUser.uid;
 
       await setDoc(doc(db, "users", uid), {
         nome: name,
-        telefone: telefone,
+        telefone,
         avatarUrl: null,
-        email: email,
-        setor: setor,
-        role: role,
-        status: "online",
+        email,
+        setor,
+        role,
         lastActive: serverTimestamp(),
       });
 
       const data = {
-        uid: uid,
+        uid,
         nome: name,
-        telefone: telefone,
-        email: value.user.email,
+        telefone,
+        email: firebaseUser.email,
         avatarUrl: null,
-        role: role,
+        role,
       };
 
       setUser(data);
@@ -112,26 +87,24 @@ function AuthProvider({ children }) {
       toast.success("Seja bem-vindo ao sistema!");
       navigate("/dashboard");
     } catch (error) {
-      console.error(error);
-      toast.error("Erro ao criar conta. Tente novamente!");
+      handleError(error);
     } finally {
       setLoadingAuth(false);
     }
-  }
+  };
 
-  // Função para atualizar a senha do usuário
-  async function updateUserPassword(newPassword) {
+  const updateUserPassword = async (newPassword) => {
     if (!user) {
       toast.error("Usuário não autenticado!");
       return;
     }
-    
+
     setLoadingAuth(true);
     try {
       const userAuth = auth.currentUser;
       await updatePassword(userAuth, newPassword);
-      
-      // Atualiza a senha no Firestore (opcional)
+
+      // Atualiza a senha no Firestore (opcional, se necessário)
       await setDoc(doc(db, "users", user.uid), {
         ...user,
         senha: newPassword,
@@ -140,40 +113,45 @@ function AuthProvider({ children }) {
       toast.success("Senha atualizada com sucesso!");
       logout();
     } catch (error) {
-      console.error(error);
-      toast.error("Erro ao atualizar a senha. Tente novamente!");
+      handleError(error);
     } finally {
       setLoadingAuth(false);
     }
-  }
+  };
 
-  // Função para redefinir a senha do usuário
-  async function resetPassword(email) {
+  const resetPassword = async (email) => {
     setLoadingAuth(true);
     try {
       await sendPasswordResetEmail(auth, email);
       toast.success("E-mail de redefinição de senha enviado com sucesso!");
     } catch (error) {
-      console.error(error);
-      toast.error("Erro ao enviar o e-mail de redefinição de senha. Tente novamente!");
+      handleError(error);
     } finally {
       setLoadingAuth(false);
     }
-  }
+  };
 
-  function storageUser(data) {
+  const storageUser = (data) => {
     localStorage.setItem('@ticketsPRO', JSON.stringify(data));
-  }
+  };
 
-  async function logout() {
-    if (user) {
-      await setUserOffline(user.uid); // Define o usuário como offline antes de sair
-    }
+  const logout = async () => {
     await signOut(auth);
     localStorage.removeItem('@ticketsPRO');
     setUser(null);
     navigate("/");
-  }
+  };
+
+  const handleError = (error) => {
+    console.error(error);
+    let errorMessage = "Ops, algo deu errado!";
+    if (error.code === 'auth/user-not-found') {
+      errorMessage = "Usuário não encontrado!";
+    } else if (error.code === 'auth/wrong-password') {
+      errorMessage = "Senha incorreta!";
+    }
+    toast.error(errorMessage);
+  };
 
   return (
     <AuthContext.Provider
@@ -187,7 +165,6 @@ function AuthProvider({ children }) {
         logout,
         loadingAuth,
         loading,
-        storageUser,
         setUser,
       }}
     >

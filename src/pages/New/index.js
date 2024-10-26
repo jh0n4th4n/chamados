@@ -18,13 +18,12 @@ export default function New() {
 
   const [customers, setCustomers] = useState([]);
   const [loadCustomer, setLoadCustomer] = useState(true);
-  const [customerSelected, setCustomerSelected] = useState(0);
+  const [customerSelected, setCustomerSelected] = useState(null); // Alterado para null
   const [complemento, setComplemento] = useState('');
   const [assunto, setAssunto] = useState('Suporte');
-  const [status, setStatus] = useState('Aberto'); // Inicialmente definido como 'Aberto'
+  const [status, setStatus] = useState('Aberto');
   const [idCustomer, setIdCustomer] = useState(false);
 
-  // Lista de assuntos relacionados a TI
   const assuntosTI = [
     'Suporte Técnico',
     'Problemas de Rede',
@@ -52,8 +51,8 @@ export default function New() {
         });
 
         if (snapshot.empty) {
-          console.log("Nenhuma empresa encontrada");
-          setCustomers([{ id: '1', nomeFantasia: 'FREELA' }]);
+          toast.warn("Nenhuma empresa encontrada");
+          setCustomers([]);
         } else {
           setCustomers(lista);
         }
@@ -65,7 +64,7 @@ export default function New() {
         }
       } catch (error) {
         console.log("Erro ao buscar os clientes", error);
-        setCustomers([{ id: '1', nomeFantasia: 'FREELA' }]);
+        toast.error("Erro ao buscar os clientes");
         setLoadCustomer(false);
       }
     }
@@ -84,14 +83,16 @@ export default function New() {
         setComplemento(snapshot.data().complemento);
 
         let index = lista.findIndex((item) => item.id === snapshot.data().clienteId);
-        setCustomerSelected(index);
+        setCustomerSelected(index !== -1 ? index : null); // Validação de índice
         setIdCustomer(true);
       } else {
         console.log("Chamado não encontrado");
+        toast.error("Chamado não encontrado");
         setIdCustomer(false);
       }
     } catch (error) {
       console.log(error);
+      toast.error("Erro ao carregar chamado");
       setIdCustomer(false);
     }
   }
@@ -115,7 +116,7 @@ export default function New() {
   async function handleRegister(e) {
     e.preventDefault();
 
-    if (!customers[customerSelected]) {
+    if (customerSelected === null || !customers[customerSelected]) {
       toast.error("Cliente inválido. Por favor, selecione um cliente.");
       return;
     }
@@ -123,38 +124,33 @@ export default function New() {
     const cliente = customers[customerSelected];
 
     try {
+      const docRef = idCustomer ? doc(db, "chamados", id) : null;
+      const data = {
+        cliente: cliente.nomeFantasia,
+        clienteId: cliente.id,
+        assunto,
+        complemento,
+        status,
+        userId: user.uid,
+      };
+
       if (idCustomer) {
-        // Atualizar chamado
-        const docRef = doc(db, "chamados", id);
-        await updateDoc(docRef, {
-          cliente: cliente.nomeFantasia,
-          clienteId: cliente.id,
-          assunto: assunto,
-          complemento: complemento,
-          status: status,
-          userId: user.uid,
-        });
+        await updateDoc(docRef, data);
         toast.info("Chamado atualizado com sucesso!");
       } else {
-        // Registrar novo chamado
         await addDoc(collection(db, "chamados"), {
+          ...data,
           created: new Date(),
-          cliente: cliente.nomeFantasia,
-          clienteId: cliente.id,
-          assunto: assunto,
-          complemento: complemento,
-          status: status,
-          userId: user.uid,
         });
         toast.success("Chamado registrado!");
       }
 
       setComplemento('');
-      setCustomerSelected(0);
+      setCustomerSelected(null); // Resetado para null
       navigate('/dashboard');
     } catch (error) {
       toast.error(idCustomer ? "Erro ao atualizar o chamado." : "Erro ao registrar o chamado.");
-      console.log(error);
+      console.error(error);
     }
   }
 
@@ -173,7 +169,8 @@ export default function New() {
             {loadCustomer ? (
               <input type="text" disabled value="Carregando..." />
             ) : (
-              <select value={customerSelected} onChange={handleChangeCustomer}>
+              <select value={customerSelected ?? ''} onChange={handleChangeCustomer}>
+                <option value="" disabled>Selecione um cliente</option>
                 {customers.map((item, index) => (
                   <option key={index} value={index}>
                     {item.nomeFantasia}
@@ -191,7 +188,6 @@ export default function New() {
               ))}
             </select>
 
-            {/* Verifica se o usuário é administrador antes de renderizar as opções de status */}
             {user.role === 'admin' && (
               <>
                 <label>Status</label>
@@ -206,7 +202,6 @@ export default function New() {
                   <span>Em aberto</span>
 
                   <input
-                    className='status'
                     type="radio"
                     name="radio"
                     value="Progresso"
@@ -229,11 +224,10 @@ export default function New() {
 
             <label>Descrição do Chamado</label>
             <textarea
-              type="text"
               placeholder="Descreva seu problema."
               value={complemento}
               onChange={(e) => setComplemento(e.target.value)}
-              required // Adicionei 'required' para garantir que o campo não esteja vazio, se necessário
+              required
             />
 
             <button type="submit">Registrar</button>

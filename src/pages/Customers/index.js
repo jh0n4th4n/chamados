@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Header from '../../components/Header';
 import Title from '../../components/Title';
 import { FiUser, FiEdit2, FiTrash2 } from 'react-icons/fi';
@@ -17,12 +17,10 @@ export default function Customers() {
   const [clientes, setClientes] = useState([]);
   const [editId, setEditId] = useState(null);
 
-  async function handleRegister(e) {
+  const handleRegister = useCallback(async (e) => {
     e.preventDefault();
-
     if (nome !== '' && telefone !== '' && endereco !== '') {
       setLoading(true);
-
       try {
         if (editId) {
           await setDoc(doc(db, "customers", editId), {
@@ -39,21 +37,19 @@ export default function Customers() {
           });
           toast.success("Cliente registrado com sucesso!");
         }
-
         setNome('');
         setTelefone('');
         setEndereco('');
         setEditId(null);
       } catch (error) {
-        toast.error("Erro ao fazer o cadastro.");
-        console.log(error);
+        toast.error("Erro ao fazer o cadastro: " + error.message);
       } finally {
         setLoading(false);
       }
     } else {
       toast.error("Preencha todos os campos!");
     }
-  }
+  }, [nome, telefone, endereco, editId]);
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, "customers"), (snapshot) => {
@@ -63,34 +59,31 @@ export default function Customers() {
       }));
       setClientes(clientesList);
     });
-    
     return () => unsubscribe();
   }, [user]);
 
-  async function handleDelete(id) {
+  const handleDelete = useCallback(async (id) => {
     const confirmDelete = window.confirm("Tem certeza que deseja excluir este cliente?");
     if (confirmDelete) {
       await deleteDoc(doc(db, "customers", id));
       toast.success("Cliente excluído com sucesso!");
     }
-  }
+  }, []);
 
-  function handleEdit(cliente) {
+  const handleEdit = useCallback((cliente) => {
     setNome(cliente.nomeFantasia);
     setTelefone(cliente.telefone);
     setEndereco(cliente.endereco);
     setEditId(cliente.id);
-  }
+  }, []);
 
   return (
     <div>
       <Header />
-
       <div className="content">
         <Title name="Clientes">
           <FiUser size={25} />
         </Title>
-
         <div className={styles.container}>
           {/* Formulário de Cadastro */}
           <form className={styles.formProfile} onSubmit={handleRegister}>
@@ -102,7 +95,6 @@ export default function Customers() {
                 onChange={(e) => setNome(e.target.value)}
               />
             </label>
-
             <label>Telefone do Cliente
               <input
                 type="tel"
@@ -111,7 +103,6 @@ export default function Customers() {
                 onChange={(e) => setTelefone(e.target.value)}
               />
             </label>
-
             <label>Endereço
               <input
                 type="text"
@@ -120,7 +111,6 @@ export default function Customers() {
                 onChange={(e) => setEndereco(e.target.value)}
               />
             </label>
-
             <button className={styles.salvar} type="submit" disabled={loading}>
               {loading ? 'Salvando...' : 'Salvar'}
             </button>

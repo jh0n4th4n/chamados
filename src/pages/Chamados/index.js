@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../../contexts/auth';
 import Header from '../../components/Header';
 import Title from '../../components/Title';
-import { FiPlus, FiMessageSquare, FiSearch, FiEdit2, FiTrash2 } from 'react-icons/fi';
+import { FiPlus, FiMessageSquare, FiEdit2, FiTrash2,FiSearch } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 import { collection, onSnapshot, query, orderBy, deleteDoc, doc, addDoc } from 'firebase/firestore';
 import { db } from '../../services/firebaseConnection';
@@ -19,8 +19,9 @@ export default function Chamados() {
   const [isEmpty, setIsEmpty] = useState(false);
   const [showPostModal, setShowPostModal] = useState(false);
   const [detail, setDetail] = useState();
-  const [visibleCount, setVisibleCount] = useState(INITIAL_LIMIT); // Contador de chamados visíveis
-  const [notifications, setNotifications] = useState([]); // Estado para notificações
+  const [visibleCount, setVisibleCount] = useState(INITIAL_LIMIT);
+  const [notifications, setNotifications] = useState([]);
+  const [feedback, setFeedback] = useState(""); // Para feedback visual
 
   useEffect(() => {
     const listRef = collection(db, "chamados");
@@ -29,8 +30,8 @@ export default function Chamados() {
       const lista = [];
       snapshot.forEach((doc) => {
         const data = doc.data();
+        const createdDate = data.created.toDate(); // Certifique-se de que created é um Timestamp
 
-        // Inclui todos os chamados na lista
         lista.push({
           id: doc.id,
           usuario: data.usuario || user.nome,
@@ -38,10 +39,10 @@ export default function Chamados() {
           cliente: data.cliente,
           clienteId: data.clienteId,
           created: data.created,
-          createdFormat: format(data.created.toDate(), 'dd/MM/yyyy HH:mm:ss a'),
+          createdFormat: format(createdDate, 'dd/MM/yyyy HH:mm:ss a'),
           status: data.status,
           complemento: data.complemento,
-          userId: data.userId, // Salva o userId do chamado
+          userId: data.userId,
         });
 
         // Notifica o usuário comum sobre alterações nos chamados que ele criou
@@ -55,14 +56,14 @@ export default function Chamados() {
         const statusOrder = {
           'Aberto': 1,
           'Em Progresso': 2,
-          'Atendido': 3
+          'Atendido': 3,
         };
         return statusOrder[a.status] - statusOrder[b.status];
       });
 
       setChamados(orderedLista);
       setLoading(false);
-      setIsEmpty(orderedLista.length === 0); // Define isEmpty baseado na lista de chamados
+      setIsEmpty(orderedLista.length === 0);
     });
 
     return () => unsubscribe(); // Limpa o listener ao desmontar o componente
@@ -71,33 +72,45 @@ export default function Chamados() {
   async function handleDelete(chamadoId) {
     const confirmDelete = window.confirm("Você tem certeza que deseja deletar este chamado?");
     if (confirmDelete) {
-      await deleteDoc(doc(db, "chamados", chamadoId)); // Deletando o documento no Firestore
+      try {
+        await deleteDoc(doc(db, "chamados", chamadoId));
+        setFeedback("Chamado excluído com sucesso!"); // Feedback visual
+        setTimeout(() => setFeedback(""), 3000); // Limpa feedback após 3 segundos
+      } catch (error) {
+        console.error("Erro ao deletar chamado:", error);
+        setFeedback("Erro ao excluir chamado."); // Mensagem de erro
+        setTimeout(() => setFeedback(""), 3000); // Limpa feedback após 3 segundos
+      }
     }
   }
 
   function toggleModal(item) {
-    setShowPostModal(!showPostModal);
+    setShowPostModal(prev => !prev);
     setDetail(item);
   }
 
   function handleLoadMore() {
-    setVisibleCount((prev) => prev + INITIAL_LIMIT); // Aumenta o número de chamados visíveis
+    setVisibleCount(prev => prev + INITIAL_LIMIT);
   }
 
   async function addChamado(chamado) {
-    const docRef = await addDoc(collection(db, "chamados"), {
-      ...chamado,
-      userId: user.uid, // Adicione o userId aqui para que o chamado seja associado ao usuário logado
-      created: new Date(),
-    });
-    setChamados((prev) => [
-      ...prev,
-      {
+    try {
+      const docRef = await addDoc(collection(db, "chamados"), {
         ...chamado,
-        id: docRef.id,
-        createdFormat: format(new Date(), 'dd/MM/yyyy HH:mm:ss a'), // Formatação da data
-      },
-    ]);
+        userId: user.uid,
+        created: new Date(),
+      });
+      setChamados(prev => [
+        ...prev,
+        {
+          ...chamado,
+          id: docRef.id,
+          createdFormat: format(new Date(), 'dd/MM/yyyy HH:mm:ss a'),
+        },
+      ]);
+    } catch (error) {
+      console.error("Erro ao adicionar chamado:", error);
+    }
   }
 
   if (loading) {
@@ -133,73 +146,74 @@ export default function Chamados() {
           </div>
         )}
 
-        <>
-          {isEmpty ? (
-            <div className="container dashboard">
-              <span>Nenhum chamado encontrado...</span>
-              <Link to="/new" className="new">
-                <FiPlus color="#FFF" size={25} />
-                Novo chamado
-              </Link>
-            </div>
-          ) : (
-            <>
-              <Link to="/new" className="new">
-                <FiPlus color="#FFF" size={25} />
-                Novo chamado
-              </Link>
-              <table>
-                <thead>
-                  <tr>
-                    <th scope="col">Cliente</th>
-                    <th scope="col">Assunto</th>
-                    <th scope="col">Status</th>
-                    <th scope="col">Cadastrado em</th>
-                    <th scope="col">Ações</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {chamados.slice(0, visibleCount).map((item) => (
-                    <tr key={item.id}>
-                      <td data-label="Cliente">{item.cliente}</td>
-                      <td data-label="Assunto">{item.assunto}</td>
-                      <td data-label="Status">
-                        <span className="badge" style={{ backgroundColor: item.status === 'Aberto' ? '#5cb85c' : item.status === 'Atendido' ? '#999999' : '#f0ad4e' }}>
-                          {item.status}
-                        </span>
-                      </td>
-                      <td data-label="Cadastrado">{item.createdFormat}</td>
-                      <td data-label="Ações">
-                        <button className="action" style={{ backgroundColor: '#3583f6' }} onClick={() => toggleModal(item)}>
-                          <FiSearch color='#FFF' size={17} />
+        {/* Feedback visual para ações do usuário */}
+        {feedback && <div className="feedback">{feedback}</div>}
+
+        {isEmpty ? (
+          <div className="container dashboard">
+            <span>Nenhum chamado encontrado...</span>
+            <Link to="/new" className="new">
+              <FiPlus color="#FFF" size={25} />
+              Novo chamado
+            </Link>
+          </div>
+        ) : (
+          <>
+            <Link to="/new" className="new">
+              <FiPlus color="#FFF" size={25} />
+              Novo chamado
+            </Link>
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">Cliente</th>
+                  <th scope="col">Assunto</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">Cadastrado em</th>
+                  <th scope="col">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                {chamados.slice(0, visibleCount).map((item) => (
+                  <tr key={item.id}>
+                    <td data-label="Cliente">{item.cliente}</td>
+                    <td data-label="Assunto">{item.assunto}</td>
+                    <td data-label="Status">
+                      <span className="badge" style={{ backgroundColor: item.status === 'Aberto' ? '#5cb85c' : item.status === 'Atendido' ? '#999999' : '#f0ad4e' }}>
+                        {item.status}
+                      </span>
+                    </td>
+                    <td data-label="Cadastrado">{item.createdFormat}</td>
+                    <td data-label="Ações">
+                      <button className="action" style={{ backgroundColor: '#3583f6' }} onClick={() => toggleModal(item)}>
+                        <FiSearch color='#FFF' size={17} />
+                      </button>
+                      {(user.role === 'admin' || item.userId === user.uid) && (
+                        <Link to={`/new/${item.id}`} className="action" style={{ backgroundColor: '#f6a935' }}>
+                          <FiEdit2 color='#FFF' size={17} />
+                        </Link>
+                      )}
+                      {user.role === 'admin' && (
+                        <button className="action" style={{ backgroundColor: '#d9534f' }} onClick={() => handleDelete(item.id)}>
+                          <FiTrash2 color='#FFF' size={17} />
                         </button>
-                        {(user.role === 'admin' || item.userId === user.uid) && ( // Adiciona a condição para administradores
-                          <Link to={`/new/${item.id}`} className="action" style={{ backgroundColor: '#f6a935' }}>
-                            <FiEdit2 color='#FFF' size={17} />
-                          </Link>
-                        )}
-                        {user.role === 'admin' && ( // Apenas administradores podem deletar
-                          <button className="action" style={{ backgroundColor: '#d9534f' }} onClick={() => handleDelete(item.id)}>
-                            <FiTrash2 color='#FFF' size={17} />
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {visibleCount < chamados.length && ( // Verifica se há mais chamados para carregar
-                <button className="btn-more" onClick={handleLoadMore}>Buscar mais</button>
-              )}
-            </>
-          )}
-        </>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {visibleCount < chamados.length && (
+              <button className="btn-more" onClick={handleLoadMore}>Buscar mais</button>
+            )}
+          </>
+        )}
       </div>
 
       {showPostModal && (
         <Modal
           conteudo={detail}
-          close={() => setShowPostModal(!showPostModal)}
+          close={() => setShowPostModal(false)}
         />
       )}
     </div>

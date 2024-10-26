@@ -35,6 +35,16 @@
   cursor: pointer;
 }
 
+.feedback {
+  background-color: #f0ad4e;
+  color: white;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  text-align: center;
+}
+
+
 table{
   border: 1px solid #CCC;
   margin: 0;
