@@ -2,7 +2,7 @@ import { useContext } from 'react';
 import avatarImg from '../../assets/avatar.png';
 import { Link } from 'react-router-dom';
 import { AuthContext } from '../../contexts/auth';
-import { FiHome, FiUser, FiSettings, FiSlack, FiUsers, FiMessageCircle } from 'react-icons/fi';
+import { FiHome, FiUser, FiSettings, FiSlack, FiUsers } from 'react-icons/fi';
 import './header.css';
 
 export default function Header() {
@@ -11,7 +11,10 @@ export default function Header() {
   return (
     <div className="sidebar">
       <div>
-        <img src={user.avatarUrl === null ? avatarImg : user.avatarUrl} alt="Foto do usuário" />
+        <img 
+          src={user.avatarUrl || avatarImg} 
+          alt="Foto do usuário" 
+        />
       </div>
 
       <Link to="/dashboard">
@@ -19,35 +22,23 @@ export default function Header() {
         Chamados
       </Link>
 
-      {/* Renderiza o link para Clientes apenas se o usuário for admin */}
-      {user && user.role === 'admin' && (
-        <Link to="/customers">
-          <FiUser color="#FFF" size={24} />
-          Clientes
-        </Link>
+      {/* Links exclusivos para o usuário admin */}
+      {user?.role === 'admin' && (
+        <>
+          <Link to="/customers">
+            <FiUser color="#FFF" size={24} />
+            Clientes
+          </Link>
+          <Link to="/users">
+            <FiUsers color="#FFF" size={24} />
+            Usuários
+          </Link>
+          <Link to="/graphs">
+            <FiSlack color="#FFF" size={24} />
+            Gráficos
+          </Link>
+        </>
       )}
-
-      {/* Renderiza o link para Usuários apenas se o usuário for admin */}
-      {user && user.role === 'admin' && (
-        <Link to="/users">
-          <FiUsers color="#FFF" size={24} />
-          Usuários
-        </Link>
-      )}
-
-      {/* Renderiza o link para Gráficos apenas se o usuário for admin */}
-      {user && user.role === 'admin' && (
-        <Link to="/graphs">
-          <FiSlack color="#FFF" size={24} />
-          Gráficos
-        </Link>
-      )}
-
-      {/* Link para o Chat */}
-      <Link to="/chat">
-        <FiMessageCircle color="#FFF" size={24} />
-        Chat
-      </Link>
 
       <Link to="/profile">
         <FiSettings color="#FFF" size={24} />
