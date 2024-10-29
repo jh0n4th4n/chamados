@@ -18,7 +18,7 @@ export default function New() {
 
   const [customers, setCustomers] = useState([]);
   const [loadCustomer, setLoadCustomer] = useState(true);
-  const [customerSelected, setCustomerSelected] = useState(null); // Alterado para null
+  const [customerSelected, setCustomerSelected] = useState(null);
   const [complemento, setComplemento] = useState('');
   const [assunto, setAssunto] = useState('Suporte');
   const [status, setStatus] = useState('Aberto');
@@ -35,6 +35,7 @@ export default function New() {
     'Segurança da Informação',
     'Backup de Dados',
     'Atualização de Software',
+    'Problemas de Impressão',
   ];
 
   useEffect(() => {
@@ -83,7 +84,7 @@ export default function New() {
         setComplemento(snapshot.data().complemento);
 
         let index = lista.findIndex((item) => item.id === snapshot.data().clienteId);
-        setCustomerSelected(index !== -1 ? index : null); // Validação de índice
+        setCustomerSelected(index !== -1 ? index : null); 
         setIdCustomer(true);
       } else {
         console.log("Chamado não encontrado");

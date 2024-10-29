@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../../contexts/auth';
 import Header from '../../components/Header';
 import Title from '../../components/Title';
-import { FiPlus, FiMessageSquare, FiEdit2, FiTrash2,FiSearch } from 'react-icons/fi';
+import { FiPlus, FiMessageSquare, FiEdit2, FiTrash2, FiSearch } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 import { collection, onSnapshot, query, orderBy, deleteDoc, doc, addDoc } from 'firebase/firestore';
 import { db } from '../../services/firebaseConnection';
@@ -74,6 +74,7 @@ export default function Chamados() {
     if (confirmDelete) {
       try {
         await deleteDoc(doc(db, "chamados", chamadoId));
+        setChamados(prev => prev.filter(item => item.id !== chamadoId)); // Remove o chamado da lista local
         setFeedback("Chamado excluído com sucesso!"); // Feedback visual
         setTimeout(() => setFeedback(""), 3000); // Limpa feedback após 3 segundos
       } catch (error) {

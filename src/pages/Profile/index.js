@@ -16,8 +16,8 @@ export default function Profile() {
   const [avatarUrl, setAvatarUrl] = useState(user?.avatarUrl || '');
   const [imageAvatar, setImageAvatar] = useState(null);
   const [nome, setNome] = useState(user?.nome || '');
-  const [email] = useState(user?.email || ''); // O email não deve ser editável
-  const [role] = useState(user?.role || ''); // O role não deve ser editável
+  const [email] = useState(user?.email || ''); 
+  const [role] = useState(user?.role || ''); 
 
   useEffect(() => {
     if (user) {
@@ -79,9 +79,9 @@ export default function Profile() {
         await handleUpload();
       } 
 
-      if (nome !== user.nome) { // Verifica se o nome foi alterado
+      if (nome !== user.nome) {
         await updateDoc(docRef, { nome: nome });
-        updatedUser.nome = nome; // Atualiza o nome no objeto user
+        updatedUser.nome = nome; 
         toast.success("Nome atualizado com sucesso!");
       }
 

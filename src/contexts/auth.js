@@ -1,3 +1,4 @@
+// src/contexts/AuthContext.js
 import { useState, createContext, useEffect } from 'react';
 import { auth, db } from '../services/firebaseConnection';
 import {
