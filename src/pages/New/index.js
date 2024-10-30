@@ -32,7 +32,7 @@ export default function New() {
     'Segurança da Informação',
     'Suporte Técnico',
     'Suporte em Planilhas',
-    'Suporte em Sitema Operacional',
+    'Suporte em Sistema Operacional',
     'Problemas de Rede',
     'Problemas de Telefonia',
     'Problemas de Telecomunicação',
