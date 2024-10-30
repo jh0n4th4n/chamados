@@ -25,17 +25,22 @@ export default function New() {
   const [idCustomer, setIdCustomer] = useState(false);
 
   const assuntosTI = [
-    'Suporte Técnico',
-    'Problemas de Rede',
-    'Problemas de Hardware',
-    'Problemas de Software',
-    'Manutenção de Equipamentos',
-    'Configuração de Sistemas',
-    'Treinamento de Usuários',
-    'Segurança da Informação',
-    'Backup de Dados',
     'Atualização de Software',
+    'Backup de Dados',
+    'Configuração de Sistemas',
+    'Manutenção de Equipamentos',
+    'Segurança da Informação',
+    'Suporte Técnico',
+    'Suporte em Planilhas',
+    'Problemas de Rede',
+    'Problemas de Telefonia',
+    'Problemas de Telecomunicação',
+    'Problemas de Internet',
+    'Problemas de Segurança',
+    'Problemas de Software',
+    'Treinamento de Usuários',
     'Problemas de Impressão',
+    'Problemas de Hardware',
   ];
 
   useEffect(() => {
