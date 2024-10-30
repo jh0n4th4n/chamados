@@ -3,12 +3,16 @@ import Header from "../../components/Header";
 import Title from "../../components/Title";
 import { useState, useEffect } from 'react';
 import { db } from '../../services/firebaseConnection';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, query, where } from 'firebase/firestore';
 import React from 'react';
-import { BarChart, Bar, XAxis, Tooltip, Legend, ResponsiveContainer, Cell, LabelList } from 'recharts';
+import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer, Cell, LabelList } from 'recharts';
+import './graficos.css';
+
 
 export default function Graphs() {
     const [data, setData] = useState([]);
+    const [startDate, setStartDate] = useState(''); // Data inicial
+    const [endDate, setEndDate] = useState(''); // Data final
 
     // Defina um mapeamento de cores por status
     const colors = {
@@ -18,33 +22,44 @@ export default function Graphs() {
         quantidade: "#000000"
     };
 
-    useEffect(() => {
-        async function fetchData() {
-            const chamadosCollection = collection(db, "chamados"); // Coleção de chamados
-            const chamadosSnapshot = await getDocs(chamadosCollection);
+    const fetchData = async (start, end) => {
+        const chamadosCollection = collection(db, "chamados");
+        let q = query(chamadosCollection);
 
-            // Contar chamados por status
-            const statusCount = {};
-            chamadosSnapshot.docs.forEach(doc => {
-                const status = doc.data().status; // Extrair o status do documento
-                if (statusCount[status]) {
-                    statusCount[status]++;
-                } else {
-                    statusCount[status] = 1;
-                }
-            });
-
-            // Converter para o formato do gráfico
-            const chartData = Object.keys(statusCount).map(status => ({
-                name: status,    // O nome será o status (ex: "concluido", "pendente")
-                quantidade: statusCount[status], // O valor será o número de chamados com esse status
-            }));
-
-            setData(chartData);
+        // Filtrar por data se as datas de início e fim estiverem definidas
+        if (start && end) {
+            q = query(chamadosCollection, where("created", ">=", new Date(start)), where("created", "<=", new Date(end)));
         }
 
-        fetchData();
-    }, []);
+        const chamadosSnapshot = await getDocs(q);
+        
+        // Contar chamados por status
+        const statusCount = {};
+        chamadosSnapshot.docs.forEach(doc => {
+            const status = doc.data().status; // Extrair o status do documento
+            if (statusCount[status]) {
+                statusCount[status]++;
+            } else {
+                statusCount[status] = 1;
+            }
+        });
+
+        // Converter para o formato do gráfico
+        const chartData = Object.keys(statusCount).map(status => ({
+            name: status,    
+            quantidade: statusCount[status], 
+        }));
+
+        setData(chartData);
+    };
+
+    useEffect(() => {
+        fetchData(startDate, endDate);
+    }, [startDate, endDate]); // Chama a função sempre que as datas mudarem
+
+    const handleFilter = () => {
+        fetchData(startDate, endDate);
+    };
 
     return (
         <div>
@@ -55,7 +70,25 @@ export default function Graphs() {
                 </Title>
                 <div className="container">
                     <div className="dashboard">
-                        <h2>Dashboard de Chamados</h2>
+                        <h2 className="subtitulo">Dashboard de Chamados</h2>
+
+                        <div className="divCalendar">
+                            <label>Data Inicial:</label>
+                            <input 
+                                className="calendar"
+                                type="date" 
+                                value={startDate} 
+                                onChange={e => setStartDate(e.target.value)} 
+                            />
+                            <label>Data Final:</label>
+                            <input 
+                                className="calendar"
+                                type="date" 
+                                value={endDate} 
+                                onChange={e => setEndDate(e.target.value)} 
+                            />
+                            <button onClick={handleFilter}>Filtrar</button>
+                        </div>
 
                         <div className="chart-container">
                             <ResponsiveContainer width={500} height={500}>
@@ -64,24 +97,21 @@ export default function Graphs() {
                                     height={300}
                                     data={data}
                                     margin={{
-                                        top: 20,
+                                        top: 30,
                                         right: 30,
-                                        left: 20,
-                                        bottom: 5,
+                                        left: 30,
+                                        bottom: 30,
+
                                     }}
                                 >
-                                    {/* Removendo o YAxis para ocultar a coluna lateral */}
                                     <XAxis dataKey="name" />
                                     <Tooltip />
-                                    {/* Legenda que usará as mesmas cores que as barras */}
-                                    <Legend formatter={(value) => <span style={{ color: colors[value] }}>{value}</span>} />
                                     <Bar dataKey="quantidade">
                                         {
                                             data.map((entry, index) => (
                                                 <Cell key={`cell-${index}`} fill={colors[entry.name]} />
                                             ))
                                         }
-                                        {/* Exibir valores em cima das barras */}
                                         <LabelList dataKey="quantidade" position="top" />
                                     </Bar>
                                 </BarChart>
