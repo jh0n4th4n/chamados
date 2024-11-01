@@ -11,24 +11,33 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
+  padding: 10px 20px;
+  box-shadow: 1px 1px 10px rgb(119, 118, 118);
+  transition: ease-in-out 0.5s;
+  border-radius: 5px;
+}
+
+.formProfile:hover{
+  box-shadow: 2px 2px 20px rgb(119, 118, 118);
 }
 
 .formProfile label{
-  font-size: 1.2em;
+  font-size: 1em;
   margin-right: 10px;
-  text-align: center;
+  text-align: left;
 }
 
 .formProfile input{
   width: 100%;
   text-align: center;
   padding: 5px;
-  border: none;
-  border-radius: 10px;
+  border: 1px solid rgb(173, 173, 173);
+  border-radius: 5px;
   font-size: 1em;
   margin-bottom: 10px;
   outline: none;
 }
+
 
 .formProfile button{
   display: flex;
@@ -41,7 +50,7 @@
   border-radius: 5px;
   cursor: pointer;
   margin-left: 10px;
-  font-size: 1.2em;
+  font-size: 1em;
   transition: background-color 0.3s ease;
   &:hover{
     background-color: #001875;

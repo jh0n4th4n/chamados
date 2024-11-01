@@ -177,15 +177,15 @@ export default function Chamados() {
               <tbody>
                 {chamados.slice(0, visibleCount).map((item) => (
                   <tr key={item.id}>
-                    <td data-label="Cliente">{item.cliente}</td>
-                    <td data-label="Assunto">{item.assunto}</td>
-                    <td data-label="Status">
+                    <td data-label="Cliente" className='efectLin'>{item.cliente}</td>
+                    <td data-label="Assunto" className='efectLin'>{item.assunto}</td>
+                    <td data-label="Status" className='efectLin'>
                       <span className="badge" style={{ backgroundColor: item.status === 'Aberto' ? '#5cb85c' : item.status === 'Atendido' ? '#999999' : '#f0ad4e' }}>
                         {item.status}
                       </span>
                     </td>
                     <td data-label="Cadastrado">{item.createdFormat}</td>
-                    <td data-label="Ações">
+                    <td data-label="Ações" className='efectLin'>
                       <button className="action" style={{ backgroundColor: '#3583f6' }} onClick={() => toggleModal(item)}>
                         <FiSearch color='#FFF' size={17} />
                       </button>
