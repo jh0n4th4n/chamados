@@ -64,10 +64,12 @@
 .filters  select:hover{
   color: #FFF;
   background-color: #5cb85c;
+  cursor: pointer;
 }
 
 .filters  input:hover{
   background-color: #5cb85c;
+  cursor: pointer;
 }
 
 .filters  input{
