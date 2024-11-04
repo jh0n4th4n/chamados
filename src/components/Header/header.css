@@ -10,7 +10,7 @@
 
 .sidebar div {
   background: url("../../assets/cover.png");
-  background-color: #000000;
+  background-color: #2b3458;
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
@@ -18,12 +18,12 @@
 }
 
 .sidebar div {
-  padding-top: 25px;
+  padding-top: 13px;
 }
 
 .sidebar div img {
-  width: 100px;
-  height: 100px;
+  width: 120px;
+  height: 120px;
   display: block;
   margin: auto;
   border-radius: 50%;
