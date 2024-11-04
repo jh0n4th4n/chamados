@@ -72,7 +72,7 @@ export default function Modal({ conteudo, close }) {
       doc.text(`Página ${doc.internal.getCurrentPageInfo().pageNumber}`, pageWidth - 20, footerY, { align: 'right' });
 
       // Salvar o PDF
-      doc.save('chamado.pdf');
+      doc.save('O.S (TI) HRJN.pdf');
     };
 
     logo.onerror = () => {
