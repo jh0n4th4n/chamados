@@ -117,7 +117,7 @@ export default function Chamados() {
         <Title name="Chamados">
           <FiMessageSquare size={25} />
         </Title>
-
+        <hr />
         <div className="filters">
           <span>Filtros</span>
           <select value={filterStatus} onChange={(e) => {
@@ -142,6 +142,7 @@ export default function Chamados() {
             onChange={(e) => setFilterDataFim(e.target.value)}
           />
         </div>
+        <hr />
 
         {isEmpty ? (
           <div className="container dashboard">

@@ -2,6 +2,7 @@
 .new{
   float: right;
   margin-bottom: 1.5em;
+  margin-top: 1.5em;
   background-color: #83bf02;
   padding: 0.5em;
   border-radius: 5px;
@@ -54,19 +55,19 @@
   width: 150px;
   height: 50px;
   margin: 5px;
+  border-radius: 5px;
   outline: none;
   border: none;
   transition: ease-in-out 0.5s;
 }
 
 .filters  select:hover{
-  background-color: #e7e2e2;
-  border: 1px solid black;
+  color: #FFF;
+  background-color: #5cb85c;
 }
 
 .filters  input:hover{
-  background-color: #ccc;
-  border: 1px solid black;
+  background-color: #5cb85c;
 }
 
 .filters  input{
@@ -79,6 +80,7 @@
   outline: none;
   border: none;
   transition: ease-in-out 0.5s;
+  border-radius: 5px;
 }
 
 
