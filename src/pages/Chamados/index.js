@@ -64,6 +64,7 @@ export default function Chamados() {
         return matchStatus && matchPeriodo;
       });
 
+      console.log("Chamados filtrados:", filtered); // Debugging
       setFilteredChamados(filtered);
       setVisibleCount(INITIAL_LIMIT); // Resetar contagem ao aplicar filtros
     };
@@ -72,7 +73,6 @@ export default function Chamados() {
   }, [chamados, filterStatus, filterDataInicio, filterDataFim]);
 
   function toggleModal(item) {
-    console.log('toggle modal');
     setDetail(item); // Define detail com o item clicado
     setShowPostModal(!showPostModal); // Alterna o estado do modal
   }
@@ -120,10 +120,13 @@ export default function Chamados() {
 
         <div className="filters">
           <span>Filtros</span>
-          <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
+          <select value={filterStatus} onChange={(e) => {
+            setFilterStatus(e.target.value);
+            console.log("Filtro de status selecionado:", e.target.value); // Debugging
+          }}>
             <option value="">Todos os status</option>
             <option value="Aberto">Aberto</option>
-            <option value="Em Progresso">Em Progresso</option>
+            <option value="Progresso">Em Progresso</option>
             <option value="Atendido">Atendido</option>
           </select>
           <input
