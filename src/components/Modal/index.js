@@ -38,11 +38,11 @@ export default function Modal({ conteudo, close }) {
       // Dados com alinhamento
       const fields = [
         ["Unidade:", "Hospital Regional Jesus Nazareno - FUSAM"],
-        ["Cliente:", conteudo.cliente],
-        ["Usuário:", conteudo.usuario],
-        ["Assunto:", conteudo.assunto],
-        ["Cadastrado em:", conteudo.createdFormat],
-        ["Status:", conteudo.status],
+        ["Cliente:", conteudo.cliente || 'N/A'],
+        ["Usuário:", conteudo.usuario || 'N/A'],
+        ["Assunto:", conteudo.assunto || 'N/A'],
+        ["Cadastrado em:", conteudo.createdFormat || 'N/A'],
+        ["Status:", conteudo.status || 'N/A'],
       ];
 
       fields.forEach(([label, value], index) => {
@@ -56,9 +56,12 @@ export default function Modal({ conteudo, close }) {
       // Complemento formatado com quebra de linha
       if (conteudo.complemento) {
         doc.setFont("helvetica", "bold");
-        doc.text("Complemento:", 10, startY + fields.length * rowHeight);
+        const complementoLabelY = startY + fields.length * rowHeight;
+        doc.text("Complemento:", 10, complementoLabelY);
         doc.setFont("helvetica", "normal");
-        doc.text(doc.splitTextToSize(conteudo.complemento, pageWidth - 20), 10, startY + (fields.length + 1) * rowHeight);
+        const complementoY = complementoLabelY + rowHeight;
+        const complementoText = doc.splitTextToSize(conteudo.complemento, pageWidth - 20);
+        doc.text(complementoText, 10, complementoY);
       }
 
       // Rodapé com data e página

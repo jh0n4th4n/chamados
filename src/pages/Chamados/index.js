@@ -4,114 +4,94 @@ import Header from '../../components/Header';
 import Title from '../../components/Title';
 import { FiPlus, FiMessageSquare, FiEdit2, FiTrash2, FiSearch } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
-import { collection, onSnapshot, query, orderBy, deleteDoc, doc, addDoc } from 'firebase/firestore';
+import { collection, onSnapshot, query, orderBy, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../../services/firebaseConnection';
 import { format } from 'date-fns';
 import Modal from '../../components/Modal';
 import './chamados.css';
 
-const INITIAL_LIMIT = 10; // Limite inicial de chamados
+const INITIAL_LIMIT = 10;
 
 export default function Chamados() {
   const { user } = useContext(AuthContext);
   const [chamados, setChamados] = useState([]);
+  const [filteredChamados, setFilteredChamados] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isEmpty, setIsEmpty] = useState(false);
   const [showPostModal, setShowPostModal] = useState(false);
-  const [detail, setDetail] = useState();
+  const [detail, setDetail] = useState(null);
   const [visibleCount, setVisibleCount] = useState(INITIAL_LIMIT);
-  const [notifications, setNotifications] = useState([]);
-  const [feedback, setFeedback] = useState(""); // Para feedback visual
+
+  // Filtros
+  const [filterStatus, setFilterStatus] = useState('');
+  const [filterDataInicio, setFilterDataInicio] = useState('');
+  const [filterDataFim, setFilterDataFim] = useState('');
 
   useEffect(() => {
     const listRef = collection(db, "chamados");
 
     const unsubscribe = onSnapshot(query(listRef, orderBy('created', 'desc')), (snapshot) => {
-      const lista = [];
-      snapshot.forEach((doc) => {
+      const lista = snapshot.docs.map((doc) => {
         const data = doc.data();
-        const createdDate = data.created.toDate(); // Certifique-se de que created é um Timestamp
-
-        lista.push({
+        return {
           id: doc.id,
-          usuario: data.usuario || user.nome,
-          assunto: data.assunto,
-          cliente: data.cliente,
-          clienteId: data.clienteId,
-          created: data.created,
-          createdFormat: format(createdDate, 'dd/MM/yyyy HH:mm:ss a'),
-          status: data.status,
-          complemento: data.complemento,
-          userId: data.userId,
-        });
-
-        // Notifica o usuário comum sobre alterações nos chamados que ele criou
-        if (user.role === 'common' && data.userId === user.uid) {
-          setNotifications(prev => [...prev, `O chamado "${data.assunto}" foi atualizado!`]);
-        }
-      });
-
-      // Ordena a lista com base no status desejado
-      const orderedLista = lista.sort((a, b) => {
-        const statusOrder = {
-          'Aberto': 1,
-          'Em Progresso': 2,
-          'Atendido': 3,
+          ...data,
+          createdFormat: format(data.created.toDate(), 'dd/MM/yyyy HH:mm:ss'),
         };
-        return statusOrder[a.status] - statusOrder[b.status];
       });
 
-      setChamados(orderedLista);
+      setChamados(lista);
+      setFilteredChamados(lista);
       setLoading(false);
-      setIsEmpty(orderedLista.length === 0);
+      setIsEmpty(lista.length === 0);
     });
 
-    return () => unsubscribe(); // Limpa o listener ao desmontar o componente
-  }, [user]);
+    return () => unsubscribe();
+  }, []);
+
+  // Função para aplicação dos filtros
+  useEffect(() => {
+    const filterChamados = () => {
+      const filtered = chamados.filter((chamado) => {
+        const createdDate = chamado.created.toDate();
+        const matchStatus = filterStatus ? chamado.status === filterStatus : true;
+        const matchPeriodo = filterDataInicio
+          ? filterDataFim
+            ? createdDate >= new Date(filterDataInicio) && createdDate <= new Date(filterDataFim)
+            : format(createdDate, 'yyyy-MM-dd') === format(new Date(filterDataInicio), 'yyyy-MM-dd')
+          : true;
+
+        return matchStatus && matchPeriodo;
+      });
+
+      setFilteredChamados(filtered);
+      setVisibleCount(INITIAL_LIMIT); // Resetar contagem ao aplicar filtros
+    };
+
+    filterChamados();
+  }, [chamados, filterStatus, filterDataInicio, filterDataFim]);
+
+  function toggleModal(item) {
+    console.log('toggle modal');
+    setDetail(item); // Define detail com o item clicado
+    setShowPostModal(!showPostModal); // Alterna o estado do modal
+  }
 
   async function handleDelete(chamadoId) {
     const confirmDelete = window.confirm("Você tem certeza que deseja deletar este chamado?");
     if (confirmDelete) {
       try {
         await deleteDoc(doc(db, "chamados", chamadoId));
-        setChamados(prev => prev.filter(item => item.id !== chamadoId)); // Remove o chamado da lista local
-        setFeedback("Chamado excluído com sucesso!"); // Feedback visual
-        setTimeout(() => setFeedback(""), 3000); // Limpa feedback após 3 segundos
+        setChamados((prev) => prev.filter((item) => item.id !== chamadoId));
+        setFilteredChamados((prev) => prev.filter((item) => item.id !== chamadoId));
       } catch (error) {
         console.error("Erro ao deletar chamado:", error);
-        setFeedback("Erro ao excluir chamado."); // Mensagem de erro
-        setTimeout(() => setFeedback(""), 3000); // Limpa feedback após 3 segundos
       }
     }
   }
 
-  function toggleModal(item) {
-    setShowPostModal(prev => !prev);
-    setDetail(item);
-  }
-
   function handleLoadMore() {
-    setVisibleCount(prev => prev + INITIAL_LIMIT);
-  }
-
-  async function addChamado(chamado) {
-    try {
-      const docRef = await addDoc(collection(db, "chamados"), {
-        ...chamado,
-        userId: user.uid,
-        created: new Date(),
-      });
-      setChamados(prev => [
-        ...prev,
-        {
-          ...chamado,
-          id: docRef.id,
-          createdFormat: format(new Date(), 'dd/MM/yyyy HH:mm:ss a'),
-        },
-      ]);
-    } catch (error) {
-      console.error("Erro ao adicionar chamado:", error);
-    }
+    setVisibleCount((prev) => prev + INITIAL_LIMIT);
   }
 
   if (loading) {
@@ -138,17 +118,27 @@ export default function Chamados() {
           <FiMessageSquare size={25} />
         </Title>
 
-        {/* Exibir notificações na parte superior da tela */}
-        {notifications.length > 0 && (
-          <div className="notifications">
-            {notifications.map((notification, index) => (
-              <div key={index} className="notification">{notification}</div>
-            ))}
-          </div>
-        )}
-
-        {/* Feedback visual para ações do usuário */}
-        {feedback && <div className="feedback">{feedback}</div>}
+        <div className="filters">
+          <span>Filtros</span>
+          <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
+            <option value="">Todos os status</option>
+            <option value="Aberto">Aberto</option>
+            <option value="Em Progresso">Em Progresso</option>
+            <option value="Atendido">Atendido</option>
+          </select>
+          <input
+            type="date"
+            placeholder="Data início"
+            value={filterDataInicio}
+            onChange={(e) => setFilterDataInicio(e.target.value)}
+          />
+          <input
+            type="date"
+            placeholder="Data fim"
+            value={filterDataFim}
+            onChange={(e) => setFilterDataFim(e.target.value)}
+          />
+        </div>
 
         {isEmpty ? (
           <div className="container dashboard">
@@ -175,28 +165,28 @@ export default function Chamados() {
                 </tr>
               </thead>
               <tbody>
-                {chamados.slice(0, visibleCount).map((item) => (
+                {filteredChamados.slice(0, visibleCount).map((item) => (
                   <tr key={item.id}>
-                    <td data-label="Cliente" className='efectLin'>{item.cliente}</td>
-                    <td data-label="Assunto" className='efectLin'>{item.assunto}</td>
-                    <td data-label="Status" className='efectLin'>
+                    <td data-label="Cliente" className="efectLin">{item.cliente}</td>
+                    <td data-label="Assunto" className="efectLin">{item.assunto}</td>
+                    <td data-label="Status" className="efectLin">
                       <span className="badge" style={{ backgroundColor: item.status === 'Aberto' ? '#5cb85c' : item.status === 'Atendido' ? '#999999' : '#f0ad4e' }}>
                         {item.status}
                       </span>
                     </td>
                     <td data-label="Cadastrado">{item.createdFormat}</td>
-                    <td data-label="Ações" className='efectLin'>
+                    <td data-label="Ações" className="efectLin">
                       <button className="action" style={{ backgroundColor: '#3583f6' }} onClick={() => toggleModal(item)}>
-                        <FiSearch color='#FFF' size={17} />
+                        <FiSearch color="#FFF" size={17} />
                       </button>
                       {(user.role === 'admin' || item.userId === user.uid) && (
                         <Link to={`/new/${item.id}`} className="action" style={{ backgroundColor: '#f6a935' }}>
-                          <FiEdit2 color='#FFF' size={17} />
+                          <FiEdit2 color="#FFF" size={17} />
                         </Link>
                       )}
                       {user.role === 'admin' && (
                         <button className="action" style={{ backgroundColor: '#d9534f' }} onClick={() => handleDelete(item.id)}>
-                          <FiTrash2 color='#FFF' size={17} />
+                          <FiTrash2 color="#FFF" size={17} />
                         </button>
                       )}
                     </td>
@@ -204,19 +194,19 @@ export default function Chamados() {
                 ))}
               </tbody>
             </table>
-            {visibleCount < chamados.length && (
+            {visibleCount < filteredChamados.length && (
               <button className="btn-more" onClick={handleLoadMore}>Buscar mais</button>
             )}
           </>
         )}
-      </div>
 
-      {showPostModal && (
-        <Modal
-          conteudo={detail}
-          close={() => setShowPostModal(false)}
-        />
-      )}
+        {showPostModal && (
+          <Modal
+            conteudo={detail}
+            close={() => setShowPostModal(false)}
+          />
+        )}
+      </div>
     </div>
   );
 }

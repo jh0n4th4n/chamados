@@ -44,6 +44,43 @@
   text-align: center;
 }
 
+.filters{
+  display: flex;
+  align-items: center;
+  justify-content: left;
+}
+
+.filters  select{
+  width: 150px;
+  height: 50px;
+  margin: 5px;
+  outline: none;
+  border: none;
+  transition: ease-in-out 0.5s;
+}
+
+.filters  select:hover{
+  background-color: #e7e2e2;
+  border: 1px solid black;
+}
+
+.filters  input:hover{
+  background-color: #ccc;
+  border: 1px solid black;
+}
+
+.filters  input{
+  width: 150px;
+  height: 50px;
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  margin: 5px;
+  outline: none;
+  border: none;
+  transition: ease-in-out 0.5s;
+}
+
 
 table{
   border: 1px solid #CCC;
