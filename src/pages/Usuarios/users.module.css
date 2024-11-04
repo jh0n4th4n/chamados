@@ -4,13 +4,77 @@
   width: 100%;
 }
 
-.formProfile {
+.formProfile{
   width: 100%;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
+  padding: 10px 20px;
+  box-shadow: 1px 1px 10px rgb(119, 118, 118);
+  transition: ease-in-out 0.5s;
+  border-radius: 5px;
+}
+
+.formProfile:hover{
+  box-shadow: 2px 2px 20px rgb(119, 118, 118);
+}
+
+.formProfile input:hover{
+  border: 1px solid black;
+}
+
+
+.formProfile label{
+  font-size: 1em;
+  margin-right: 10px;
+  text-align: left;
+}
+
+.formProfile label input{
+  width: 100%;
+  text-align: center;
+  padding: 5px;
+  border: 1px solid rgb(173, 173, 173);
+  border-radius: 5px;
+  font-size: 1em;
+  margin-bottom: 10px;
+  outline: none;
+  transition: ease-in-out 0.5s;
+  margin-top: 2px;
+}
+
+.formProfile label select{
+  width: 100%;
+  text-align: center;
+  padding: 5px;
+  border: 1px solid rgb(173, 173, 173);
+  border-radius: 5px;
+  font-size: 1em;
+  margin-bottom: 10px;
+  outline: none;
+  transition: ease-in-out 0.5s;
+  margin-top: 2px;
+}
+
+
+
+.formProfile input:hover{
+  border: 1px solid black;
+}
+
+.tableContainer table thead th{
+  font-size: 1.1em;
+  background-color: #f0efef;
+}
+
+.tableContainer table tr:hover{
+  background-color: #f1f1f1;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  font-weight: 600;
+  border-bottom: 1px solid #9698a1;
 }
 
 

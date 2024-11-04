@@ -17,22 +17,15 @@
   border-radius: 5px;
 }
 
-.tableContainer table thead th{
-  font-size: 1.1em;
-  background-color: #f0efef;
-}
-
-.tableContainer table tr:hover{
-  background-color: #f1f1f1;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  font-weight: 600;
-  border-bottom: 1px solid #9698a1;
-}
-
 .formProfile:hover{
   box-shadow: 2px 2px 20px rgb(119, 118, 118);
 }
+
+
+.formProfile input:hover{
+  border: 1px solid black;
+}
+
 
 .formProfile label{
   font-size: 1em;
@@ -53,11 +46,6 @@
   margin-top: 2px;
 }
 
-.formProfile input:hover{
-  border: 1px solid black;
-}
-
-
 .formProfile button{
   display: flex;
   justify-content: center;
@@ -76,6 +64,21 @@
   }
 
 }
+
+.tableContainer table thead th{
+  font-size: 1.1em;
+  background-color: #f0efef;
+}
+
+.tableContainer table tr:hover{
+  background-color: #f1f1f1;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  font-weight: 600;
+  border-bottom: 1px solid #9698a1;
+}
+
+
 
 .action{
   border:0;
