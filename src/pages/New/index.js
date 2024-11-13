@@ -28,6 +28,8 @@ export default function New() {
     'Atualização de Software',
     'Backup de Dados',
     'Configuração de Sistemas',
+    'Instalar Software',
+    'Instalar Software Especificos',
     'Manutenção de Equipamentos',
     'Segurança da Informação',
     'Suporte Técnico',
