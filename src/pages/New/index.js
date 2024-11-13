@@ -29,7 +29,7 @@ export default function New() {
     'Backup de Dados',
     'Configuração de Sistemas',
     'Instalar Software',
-    'Instalar Software Especificos',
+    'Instalação e Gestão de Antivírus',
     'Manutenção de Equipamentos',
     'Segurança da Informação',
     'Suporte Técnico',
