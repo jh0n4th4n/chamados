@@ -1,9 +1,23 @@
-import { FiX, FiPrinter } from 'react-icons/fi'; 
+import { useEffect, useState } from 'react';
+import { FiX, FiPrinter } from 'react-icons/fi';
 import { jsPDF } from 'jspdf';
+import { getAuth } from 'firebase/auth';
 import './modal.css';
 import Logo from '../../assets/Logo HRJN.png';
-
 export default function Modal({ conteudo, close }) {
+  const [nomeUsuario, setNomeUsuario] = useState('');
+
+  useEffect(() => {
+    const auth = getAuth();
+    const user = auth.currentUser;
+
+    if (user && user.displayName) {
+      setNomeUsuario(user.displayName);
+    } else {
+      setNomeUsuario('Nome do usuário indisponível');
+    }
+  }, []);
+
   const handlePrint = () => {
     const doc = new jsPDF();
 
@@ -39,7 +53,7 @@ export default function Modal({ conteudo, close }) {
       const fields = [
         ["Unidade:", "Hospital Regional Jesus Nazareno - FUSAM"],
         ["Cliente:", conteudo.cliente || 'N/A'],
-        ["Usuário:", conteudo.usuario || 'N/A'],
+        ["Usuário:", nomeUsuario || 'Jhonathan Lucas'],
         ["Assunto:", conteudo.assunto || 'N/A'],
         ["Cadastrado em:", conteudo.createdFormat || 'N/A'],
         ["Status:", conteudo.status || 'N/A'],
@@ -95,6 +109,7 @@ export default function Modal({ conteudo, close }) {
           <h2>Detalhes do chamado</h2>
           <div className="row"><span>Unidade: <i>Hospital Regional Jesus Nazareno - FUSAM</i></span></div>
           <div className="row"><span>Cliente: <i>{conteudo.cliente}</i></span></div>
+          <div className="row"><span>Usuário: <i>{nomeUsuario}</i></span></div>
           <div className="row"><span>Assunto: <i>{conteudo.assunto}</i></span></div>
           <div className="row"><span>Cadastrado em: <i>{conteudo.createdFormat}</i></span></div>
           <div className="row"><span>Status: <i className="status-badge" style={{ color: "#FFF", backgroundColor: conteudo.status === 'Aberto' ? '#5cb85c' : '#999' }}>{conteudo.status}</i></span></div>

@@ -5,120 +5,101 @@ import { FiUser, FiEdit2, FiTrash2, FiLock } from 'react-icons/fi';
 import { db } from '../../services/firebaseConnection';
 import { collection, onSnapshot, deleteDoc, doc, setDoc } from 'firebase/firestore';
 import { toast } from 'react-toastify';
-import styles from './users.module.css';
 import { getAuth, createUserWithEmailAndPassword, sendPasswordResetEmail, deleteUser } from "firebase/auth";
+import styles from './users.module.css';
 
 export default function Users() {
-  const [nome, setNome] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [role, setRole] = useState('');
+  const [formData, setFormData] = useState({ nome: '', email: '', password: '', role: '' });
   const [loading, setLoading] = useState(false);
   const [usuarios, setUsuarios] = useState([]);
   const [editId, setEditId] = useState(null);
 
-  async function handleRegister(e) {
+  // Atualiza os valores do formulário
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const clearForm = () => {
+    setFormData({ nome: '', email: '', password: '', role: '' });
+    setEditId(null);
+  };
+
+  // Registra ou atualiza um usuário
+  const handleRegister = async (e) => {
     e.preventDefault();
+    const { nome, email, password, role } = formData;
 
-    if (nome && email && role && password) {
-      setLoading(true);
-
-      try {
-        const auth = getAuth();
-
-        if (editId) {
-          // Atualiza usuário existente
-          await setDoc(doc(db, "users", editId), {
-            nome,
-            email,
-            role,
-          });
-          toast.success("Usuário atualizado com sucesso!");
-        } else {
-          // Cria o usuário no Firebase Authentication e salva no Firestore
-          const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-          const uid = userCredential.user.uid;
-
-          await setDoc(doc(db, "users", uid), {
-            nome,
-            email,
-            role,
-          });
-          toast.success("Usuário cadastrado com sucesso no sistema!");
-        }
-
-        // Limpa os campos após o cadastro
-        setNome('');
-        setEmail('');
-        setPassword('');
-        setRole('');
-        setEditId(null);
-      } catch (error) {
-        toast.error("Erro ao cadastrar usuário: " + error.message);
-        console.log(error);
-      } finally {
-        setLoading(false);
-      }
-    } else {
-      toast.error("Preencha todos os campos!");
+    if (!nome || !email || !role || (!editId && !password)) {
+      toast.error("Por favor, preencha todos os campos obrigatórios!");
+      return;
     }
-  }
 
+    setLoading(true);
+    try {
+      const auth = getAuth();
+
+      if (editId) {
+        await setDoc(doc(db, "users", editId), { nome, email, role });
+        toast.success("Usuário atualizado com sucesso!");
+      } else {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const uid = userCredential.user.uid;
+
+        await setDoc(doc(db, "users", uid), { nome, email, role });
+        toast.success("Usuário cadastrado com sucesso!");
+      }
+
+      clearForm();
+    } catch (error) {
+      toast.error("Erro ao salvar o usuário: " + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Obtém usuários em tempo real
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, "users"), (snapshot) => {
-      const usersList = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
+      const usersList = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
       setUsuarios(usersList);
     });
 
     return () => unsubscribe();
   }, []);
 
-  async function handleDelete(id, email) {
-    const confirmDelete = window.confirm("Tem certeza que deseja excluir este usuário?");
-    if (confirmDelete) {
-      try {
-        const auth = getAuth();
-        await deleteDoc(doc(db, "users", id));
+  // Deleta um usuário
+  const handleDelete = async (id, email) => {
+    if (!window.confirm("Tem certeza que deseja excluir este usuário?")) return;
 
-        const user = auth.currentUser;
-        if (user && user.email === email) {
-          await deleteUser(user);
-          toast.success("Usuário excluído com sucesso!");
-        } else {
-          toast.error("Erro ao excluir o usuário de autenticação.");
-        }
-      } catch (error) {
-        toast.error("Erro ao excluir o usuário: " + error.message);
-        console.log(error);
-      }
-    }
-  }
-
-  function handleEdit(usuario) {
-    setNome(usuario.nome);
-    setEmail(usuario.email);
-    setRole(usuario.role);
-    setEditId(usuario.id);
-  }
-
-  async function handleResetPassword(email) {
-    const auth = getAuth();
     try {
-      await sendPasswordResetEmail(auth, email);
-      toast.success("E-mail de redefinição de senha enviado com sucesso!");
+      const auth = getAuth();
+      await deleteDoc(doc(db, "users", id));
+
+      const user = auth.currentUser;
+      if (user && user.email === email) {
+        await deleteUser(user);
+        toast.success("Usuário excluído com sucesso!");
+      }
     } catch (error) {
-      toast.error("Erro ao enviar e-mail de redefinição de senha: " + error.message);
-      console.log(error);
+      toast.error("Erro ao excluir o usuário: " + error.message);
     }
-  }
+  };
+
+  // Reseta a senha do usuário
+  const handleResetPassword = async (email) => {
+    try {
+      const auth = getAuth();
+      await sendPasswordResetEmail(auth, email);
+      toast.success("E-mail de redefinição de senha enviado!");
+    } catch (error) {
+      toast.error("Erro ao enviar redefinição de senha: " + error.message);
+    }
+  };
 
   return (
     <div>
       <Header />
-
       <div className="content">
         <Title name="Usuários">
           <FiUser size={25} />
@@ -126,50 +107,51 @@ export default function Users() {
 
         <div className={styles.container}>
           <form className={styles.formProfile} onSubmit={handleRegister}>
-            <label>Nome do Usuário
+            <label>
+              Nome do Usuário
               <input
                 type="text"
+                name="nome"
                 placeholder="Digite o nome do usuário"
-                value={nome}
-                onChange={(e) => setNome(e.target.value)}
+                value={formData.nome}
+                onChange={handleChange}
                 required
               />
             </label>
-
-            <label>Email do Usuário
+            <label>
+              Email do Usuário
               <input
                 type="email"
+                name="email"
                 placeholder="Digite o email do usuário"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={formData.email}
+                onChange={handleChange}
                 required
               />
             </label>
-
-            <label>Senha do Usuário
-              <input
-                type="password"
-                placeholder="Digite uma senha"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </label>
-
-            <label>Role do Usuário
-              <select
-                value={role}
-                onChange={(e) => setRole(e.target.value)}
-                required
-              >
+            {!editId && (
+              <label>
+                Senha do Usuário
+                <input
+                  type="password"
+                  name="password"
+                  placeholder="Digite uma senha"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                />
+              </label>
+            )}
+            <label>
+              Role do Usuário
+              <select name="role" value={formData.role} onChange={handleChange} required>
                 <option value="">Selecione o tipo de perfil</option>
                 <option value="admin">Admin</option>
                 <option value="user">User</option>
               </select>
             </label>
-
             <button className={styles.salvar} type="submit" disabled={loading}>
-              {loading ? 'Salvando...' : 'Salvar'}
+              {loading ? "Salvando..." : "Salvar"}
             </button>
           </form>
 
@@ -184,20 +166,32 @@ export default function Users() {
                 </tr>
               </thead>
               <tbody>
-                {usuarios.map(usuario => (
+                {usuarios.map((usuario) => (
                   <tr key={usuario.id}>
                     <td>{usuario.nome}</td>
                     <td>{usuario.email}</td>
                     <td>{usuario.role}</td>
                     <td>
-                      <button className={styles.action} style={{ backgroundColor: '#f6a935' }} onClick={() => handleEdit(usuario)}>
-                        <FiEdit2 color='#FFF' size={17} />
+                      <button
+                        className={styles.action}
+                        style={{ backgroundColor: '#f6a935' }}
+                        onClick={() => setFormData({ ...usuario, password: '' }, setEditId(usuario.id))}
+                      >
+                        <FiEdit2 color="#FFF" size={17} />
                       </button>
-                      <button className={styles.action} style={{ backgroundColor: '#d9534f' }} onClick={() => handleDelete(usuario.id, usuario.email)}>
-                        <FiTrash2 color='#FFF' size={17} />
+                      <button
+                        className={styles.action}
+                        style={{ backgroundColor: '#d9534f' }}
+                        onClick={() => handleDelete(usuario.id, usuario.email)}
+                      >
+                        <FiTrash2 color="#FFF" size={17} />
                       </button>
-                      <button className={styles.action} style={{ backgroundColor: '#5bc0de' }} onClick={() => handleResetPassword(usuario.email)}>
-                        <FiLock color='#FFF' size={17} />
+                      <button
+                        className={styles.action}
+                        style={{ backgroundColor: '#5bc0de' }}
+                        onClick={() => handleResetPassword(usuario.email)}
+                      >
+                        <FiLock color="#FFF" size={17} />
                       </button>
                     </td>
                   </tr>

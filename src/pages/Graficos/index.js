@@ -5,57 +5,78 @@ import { useState, useEffect } from 'react';
 import { db } from '../../services/firebaseConnection';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import React from 'react';
-import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer, Cell, LabelList } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, LabelList, LineChart, Line, PieChart, Pie, Legend } from 'recharts';
 import './graficos.css';
 
-
-export default function Graphs() {
+const Graphs = () => {
     const [data, setData] = useState([]);
-    const [startDate, setStartDate] = useState(''); // Data inicial
-    const [endDate, setEndDate] = useState(''); // Data final
+    const [lineData, setLineData] = useState([]);  // Dados para o gráfico de linha (distribuição temporal)
+    const [pieData, setPieData] = useState([]);  // Dados para o gráfico de pizza
+    const [startDate, setStartDate] = useState('');
+    const [endDate, setEndDate] = useState('');
+    const [loading, setLoading] = useState(false);
 
-    // Defina um mapeamento de cores por status
     const colors = {
-        Atendido: "#8884d8",
-        Progresso: "#82ca9d",
-        Aberto: "#ffc658",
-        quantidade: "#000000"
+        Atendido: "#82ca9d",
+        Progresso: "#ffc658",
+        Aberto: "#8884d8",
     };
 
     const fetchData = async (start, end) => {
-        const chamadosCollection = collection(db, "chamados");
-        let q = query(chamadosCollection);
+        setLoading(true);
+        try {
+            const chamadosCollection = collection(db, "chamados");
+            let q = query(chamadosCollection);
 
-        // Filtrar por data se as datas de início e fim estiverem definidas
-        if (start && end) {
-            q = query(chamadosCollection, where("created", ">=", new Date(start)), where("created", "<=", new Date(end)));
-        }
-
-        const chamadosSnapshot = await getDocs(q);
-        
-        // Contar chamados por status
-        const statusCount = {};
-        chamadosSnapshot.docs.forEach(doc => {
-            const status = doc.data().status; // Extrair o status do documento
-            if (statusCount[status]) {
-                statusCount[status]++;
-            } else {
-                statusCount[status] = 1;
+            if (start && end) {
+                q = query(chamadosCollection, where("created", ">=", new Date(start)), where("created", "<=", new Date(end)));
             }
-        });
 
-        // Converter para o formato do gráfico
-        const chartData = Object.keys(statusCount).map(status => ({
-            name: status,    
-            quantidade: statusCount[status], 
-        }));
+            const chamadosSnapshot = await getDocs(q);
 
-        setData(chartData);
+            const statusCount = {};
+            const timeSeries = {};  // Para a linha temporal
+            chamadosSnapshot.docs.forEach(doc => {
+                const status = doc.data().status;
+                const createdAt = doc.data().created.toDate();
+                const dateString = createdAt.toLocaleDateString();  // Data formatada para o eixo x do gráfico de linha
+
+                // Contagem de status
+                statusCount[status] = (statusCount[status] || 0) + 1;
+
+                // Contagem por data para gráfico de linha
+                timeSeries[dateString] = (timeSeries[dateString] || 0) + 1;
+            });
+
+            const chartData = Object.keys(statusCount).map(status => ({
+                name: status,
+                quantidade: statusCount[status],
+            }));
+
+            const lineChartData = Object.keys(timeSeries).map(date => ({
+                name: date,
+                quantidade: timeSeries[date],
+            }));
+
+            const pieChartData = Object.keys(statusCount).map(status => ({
+                name: status,
+                value: statusCount[status],
+            }));
+
+            setData(chartData);
+            setLineData(lineChartData);
+            setPieData(pieChartData);
+
+        } catch (error) {
+            console.error("Erro ao buscar dados:", error);
+        } finally {
+            setLoading(false);
+        }
     };
 
     useEffect(() => {
         fetchData(startDate, endDate);
-    }, [startDate, endDate]); // Chama a função sempre que as datas mudarem
+    }, [startDate, endDate]);
 
     const handleFilter = () => {
         fetchData(startDate, endDate);
@@ -74,52 +95,98 @@ export default function Graphs() {
 
                         <div className="divCalendar">
                             <label>Data Inicial:</label>
-                            <input 
+                            <input
                                 className="calendar"
-                                type="date" 
-                                value={startDate} 
-                                onChange={e => setStartDate(e.target.value)} 
+                                type="date"
+                                value={startDate}
+                                onChange={e => setStartDate(e.target.value)}
                             />
                             <label>Data Final:</label>
-                            <input 
+                            <input
                                 className="calendar"
-                                type="date" 
-                                value={endDate} 
-                                onChange={e => setEndDate(e.target.value)} 
+                                type="date"
+                                value={endDate}
+                                onChange={e => setEndDate(e.target.value)}
                             />
                             <button onClick={handleFilter}>Filtrar</button>
                         </div>
 
-                        <div className="chart-container">
-                            <ResponsiveContainer width={500} height={500}>
-                                <BarChart
-                                    width={500}
-                                    height={300}
-                                    data={data}
-                                    margin={{
-                                        top: 30,
-                                        right: 30,
-                                        left: 30,
-                                        bottom: 30,
+                        {loading ? (
+                            <div className="loading">Carregando...</div>
+                        ) : (
+                            <>
+                                <div className="chart-container">
+                                    <h3>Distribuição de Chamados por Status</h3>
+                                    <ResponsiveContainer width="100%" height={400}>
+                                        <BarChart
+                                            data={data}
+                                            margin={{
+                                                top: 30,
+                                                right: 50,
+                                                left: 50,
+                                                bottom: 20,
+                                            }}
+                                        >
+                                            <XAxis dataKey="name" label={{ value: "Status dos Chamados", position: "insideBottom", offset: -5 }} />
+                                            <YAxis label={{ value: "Quantidade", angle: -90, position: "insideLeft" }} />
+                                            <Tooltip />
+                                            <Bar dataKey="quantidade" radius={[10, 10, 0, 0]}>
+                                                {data.map((entry, index) => (
+                                                    <Cell key={`cell-${index}`} fill={colors[entry.name]} />
+                                                ))}
+                                                <LabelList dataKey="quantidade" position="top" />
+                                            </Bar>
+                                        </BarChart>
+                                    </ResponsiveContainer>
+                                </div>
 
-                                    }}
-                                >
-                                    <XAxis dataKey="name" />
-                                    <Tooltip />
-                                    <Bar dataKey="quantidade">
-                                        {
-                                            data.map((entry, index) => (
-                                                <Cell key={`cell-${index}`} fill={colors[entry.name]} />
-                                            ))
-                                        }
-                                        <LabelList dataKey="quantidade" position="top" />
-                                    </Bar>
-                                </BarChart>
-                            </ResponsiveContainer>
-                        </div>
+                                <div className="chart-container">
+                                    <h3>Distribuição Temporal de Chamados</h3>
+                                    <ResponsiveContainer width="100%" height={400}>
+                                        <LineChart
+                                            data={lineData}
+                                            margin={{
+                                                top: 30,
+                                                right: 50,
+                                                left: 50,
+                                                bottom: 20,
+                                            }}
+                                        >
+                                            <XAxis dataKey="name" label={{ value: "Data", position: "insideBottom", offset: -5 }} />
+                                            <YAxis label={{ value: "Quantidade", angle: -90, position: "insideLeft" }} />
+                                            <Tooltip />
+                                            <Line type="monotone" dataKey="quantidade" stroke="#8884d8" />
+                                        </LineChart>
+                                    </ResponsiveContainer>
+                                </div>
+
+                                <div className="chart-container">
+                                    <h3>Distribuição de Chamados por Status</h3>
+                                    <ResponsiveContainer width="100%" height={400}>
+                                        <PieChart>
+                                            <Pie
+                                                data={pieData}
+                                                dataKey="value"
+                                                nameKey="name"
+                                                outerRadius={150}
+                                                label
+                                                labelLine={false}
+                                            >
+                                                {pieData.map((entry, index) => (
+                                                    <Cell key={`cell-${index}`} fill={colors[entry.name]} />
+                                                ))}
+                                            </Pie>
+                                            <Legend />
+                                        </PieChart>
+                                    </ResponsiveContainer>
+                                </div>
+                            </>
+                        )}
                     </div>
                 </div>
             </div>
         </div>
     );
-}
+};
+
+export default Graphs;

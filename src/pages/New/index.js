@@ -92,7 +92,7 @@ export default function New() {
         setComplemento(snapshot.data().complemento);
 
         let index = lista.findIndex((item) => item.id === snapshot.data().clienteId);
-        setCustomerSelected(index !== -1 ? index : null); 
+        setCustomerSelected(index !== -1 ? index : null);
         setIdCustomer(true);
       } else {
         console.log("Chamado não encontrado");
