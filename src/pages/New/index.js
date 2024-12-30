@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext, useCallback } from 'react'; // useCallback importado
 import Header from '../../components/Header';
 import Title from '../../components/Title';
 import { FiPlusCircle } from 'react-icons/fi';
@@ -46,6 +46,31 @@ export default function New() {
     'Problemas de Hardware',
   ];
 
+  const loadId = useCallback(async (lista) => { // useCallback adicionado
+    const docRef = doc(db, "chamados", id);
+    try {
+      const snapshot = await getDoc(docRef);
+
+      if (snapshot.exists()) {
+        setAssunto(snapshot.data().assunto);
+        setStatus(snapshot.data().status);
+        setComplemento(snapshot.data().complemento);
+
+        let index = lista.findIndex((item) => item.id === snapshot.data().clienteId);
+        setCustomerSelected(index !== -1 ? index : null);
+        setIdCustomer(true);
+      } else {
+        console.log("Chamado não encontrado");
+        toast.error("Chamado não encontrado");
+        setIdCustomer(false);
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error("Erro ao carregar chamado");
+      setIdCustomer(false);
+    }
+  }, [id]); // Dependência id foi incluída
+
   useEffect(() => {
     async function loadCustomers() {
       try {
@@ -69,7 +94,7 @@ export default function New() {
         setLoadCustomer(false);
 
         if (id) {
-          loadId(lista);
+          loadId(lista); // Chama a função para carregar o chamado
         }
       } catch (error) {
         console.log("Erro ao buscar os clientes", error);
@@ -79,32 +104,7 @@ export default function New() {
     }
 
     loadCustomers();
-  }, [id]);
-
-  async function loadId(lista) {
-    const docRef = doc(db, "chamados", id);
-    try {
-      const snapshot = await getDoc(docRef);
-
-      if (snapshot.exists()) {
-        setAssunto(snapshot.data().assunto);
-        setStatus(snapshot.data().status);
-        setComplemento(snapshot.data().complemento);
-
-        let index = lista.findIndex((item) => item.id === snapshot.data().clienteId);
-        setCustomerSelected(index !== -1 ? index : null);
-        setIdCustomer(true);
-      } else {
-        console.log("Chamado não encontrado");
-        toast.error("Chamado não encontrado");
-        setIdCustomer(false);
-      }
-    } catch (error) {
-      console.log(error);
-      toast.error("Erro ao carregar chamado");
-      setIdCustomer(false);
-    }
-  }
+  }, [id, loadId]); // Incluído loadId como dependência
 
   function handleOptionChange(e) {
     setStatus(e.target.value);
