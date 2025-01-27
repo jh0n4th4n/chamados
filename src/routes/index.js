@@ -8,6 +8,7 @@ import Private from './Private';
 import Graphs from '../pages/Graficos';
 import Users from '../pages/Usuarios';
 import NotFound from '../pages/Acesso Negado'; // Importe seu componente de página 404
+import Contratos from '../pages/Contratos';
 
 function RoutesApp() {
   return (
@@ -20,6 +21,8 @@ function RoutesApp() {
       <Route path="/new" element={<Private><New /></Private>} />
       <Route path="/new/:id" element={<Private><New /></Private>} />
       <Route path="/graphs" element={<Private><Graphs /></Private>} />
+      <Route path="/contratos" element={<Private><Contratos /></Private>} />
+
       <Route path="*" element={<NotFound />} /> {/* Rota para página não encontrada */}
     </Routes>
   );
