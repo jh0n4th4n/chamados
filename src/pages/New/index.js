@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext, useCallback } from 'react'; // useCallback importado
+import { useState, useEffect, useContext, useCallback } from 'react';
 import Header from '../../components/Header';
 import Title from '../../components/Title';
 import { FiPlusCircle } from 'react-icons/fi';
@@ -25,28 +25,53 @@ export default function New() {
   const [idCustomer, setIdCustomer] = useState(false);
 
   const assuntosTI = [
-    'Atualização de Software',
-    'Backup de Dados',
-    'Configuração de Sistemas',
-    'Instalar Software',
-    'Instalação e Gestão de Antivírus',
-    'Manutenção de Equipamentos',
-    'Segurança da Informação',
-    'Suporte Técnico',
-    'Suporte em Planilhas',
-    'Suporte em Sistema Operacional',
-    'Problemas de Rede',
-    'Problemas de Telefonia',
-    'Problemas de Telecomunicação',
-    'Problemas de Internet',
-    'Problemas de Segurança',
-    'Problemas de Software',
-    'Treinamento de Usuários',
-    'Problemas de Impressão',
-    'Problemas de Hardware',
+    "Atualização de Software",
+    "Conflito entre Aplicativos",
+    "Erro de Sistema",
+    "Falha ao Atualizar Software",
+    "Falha na Inicialização do Sistema",
+    "Instalar Software",
+    "Lentidão no Sistema",
+    "Problema com Aplicativos Web",
+    "Problema com Licenciamento de Software",
+    "Problema com Sincronização de Dados",
+    "Problema de Software",
+    "Problema de Sistema Operacional",
+    "Manutenção de Equipamentos",
+    "Problema com Dispositivos USB",
+    "Problema com Drivers",
+    "Problema com Monitor",
+    "Problema com Periféricos",
+    "Problema de Hardware",
+    "Falha ao Acessar Servidor",
+    "Falha na Conexão VPN",
+    "Falha na Rede Wi-Fi",
+    "Problema com Compartilhamento de Arquivos",
+    "Problema com Conectividade Bluetooth",
+    "Problema com Impressão em Rede",
+    "Problema de Internet",
+    "Problema de Rede",
+    "Problema em Servidores",
+    "Queda de Conexão com Banco de Dados",
+    "Instalação e Gestão de Antivírus",
+    "Problema com Firewall",
+    "Problema de Segurança",
+    "Backup de Dados",
+    "Configuração de Sistemas",
+    "Problema com Acesso Remoto",
+    "Problema com Armazenamento em Nuvem",
+    "Problema com Backup Automático",
+    "Suporte Técnico",
+    "Suporte em Planilhas",
+    "Suporte em Sistema Operacional",
+    "Treinamento de Usuários",
+    "Problema de Telecomunicação",
+    "Problema de Telefonia",
+    "Problema de Impressão",
   ];
 
-  const loadId = useCallback(async (lista) => { // useCallback adicionado
+  // Função para carregar os dados do chamado (se estiver editando)
+  const loadId = useCallback(async (lista) => {
     const docRef = doc(db, "chamados", id);
     try {
       const snapshot = await getDoc(docRef);
@@ -56,21 +81,22 @@ export default function New() {
         setStatus(snapshot.data().status);
         setComplemento(snapshot.data().complemento);
 
-        let index = lista.findIndex((item) => item.id === snapshot.data().clienteId);
+        // Encontra o índice do cliente selecionado
+        const index = lista.findIndex((item) => item.id === snapshot.data().clienteId);
         setCustomerSelected(index !== -1 ? index : null);
         setIdCustomer(true);
       } else {
-        console.log("Chamado não encontrado");
         toast.error("Chamado não encontrado");
         setIdCustomer(false);
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
       toast.error("Erro ao carregar chamado");
       setIdCustomer(false);
     }
-  }, [id]); // Dependência id foi incluída
+  }, [id]);
 
+  // Carrega a lista de clientes
   useEffect(() => {
     async function loadCustomers() {
       try {
@@ -93,19 +119,21 @@ export default function New() {
 
         setLoadCustomer(false);
 
+        // Se estiver editando, carrega os dados do chamado
         if (id) {
-          loadId(lista); // Chama a função para carregar o chamado
+          loadId(lista);
         }
       } catch (error) {
-        console.log("Erro ao buscar os clientes", error);
+        console.error("Erro ao buscar os clientes", error);
         toast.error("Erro ao buscar os clientes");
         setLoadCustomer(false);
       }
     }
 
     loadCustomers();
-  }, [id, loadId]); // Incluído loadId como dependência
+  }, [id, loadId]);
 
+  // Funções para manipulação de estado
   function handleOptionChange(e) {
     setStatus(e.target.value);
   }
@@ -118,48 +146,51 @@ export default function New() {
     const selectedIndex = e.target.value;
     if (customers[selectedIndex]) {
       setCustomerSelected(selectedIndex);
-      console.log(customers[selectedIndex].nomeFantasia);
     }
   }
 
+  // Registra ou atualiza um chamado
   async function handleRegister(e) {
     e.preventDefault();
 
+    // Validação do cliente selecionado
     if (customerSelected === null || !customers[customerSelected]) {
-      toast.error("Cliente inválido. Por favor, selecione um cliente.");
+      toast.error("Selecione um cliente válido.");
       return;
     }
 
     const cliente = customers[customerSelected];
 
     try {
-      const docRef = idCustomer ? doc(db, "chamados", id) : null;
       const data = {
         cliente: cliente.nomeFantasia,
         clienteId: cliente.id,
         assunto,
         complemento,
         status,
-        userId: user.uid,
+        userId: user.uid, // Preserva o userId do criador
       };
 
       if (idCustomer) {
-        await updateDoc(docRef, data);
-        toast.info("Chamado atualizado com sucesso!");
+        // Atualiza o chamado existente
+        await updateDoc(doc(db, "chamados", id), data);
+        toast.success("Chamado atualizado com sucesso!");
       } else {
+        // Cria um novo chamado
         await addDoc(collection(db, "chamados"), {
           ...data,
           created: new Date(),
         });
-        toast.success("Chamado registrado!");
+        toast.success("Chamado registrado com sucesso!");
       }
 
+      // Reseta o formulário
       setComplemento('');
-      setCustomerSelected(null); // Resetado para null
+      setCustomerSelected(null);
       navigate('/dashboard');
     } catch (error) {
-      toast.error(idCustomer ? "Erro ao atualizar o chamado." : "Erro ao registrar o chamado.");
       console.error(error);
+      toast.error(idCustomer ? "Erro ao atualizar o chamado." : "Erro ao registrar o chamado.");
     }
   }
 
