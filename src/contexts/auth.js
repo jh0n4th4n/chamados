@@ -20,23 +20,26 @@ function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  // Carrega o usuário do localStorage ao iniciar o sistema
   useEffect(() => {
     const loadUser = () => {
       const storageUser = localStorage.getItem('@ticketsPRO');
       if (storageUser) {
-        setUser(JSON.parse(storageUser));
+        const parsedUser = JSON.parse(storageUser);
+        console.log("UID carregado:", parsedUser.uid); // Log para verificar o UID
+        setUser(parsedUser);
       }
       setLoading(false);
     };
     loadUser();
   }, []);
 
+  // Função para login
   const signIn = async (email, password) => {
     setLoadingAuth(true);
     try {
       const { user: firebaseUser } = await signInWithEmailAndPassword(auth, email, password);
       const uid = firebaseUser.uid;
-
       const userDoc = await getDoc(doc(db, "users", uid));
       const data = {
         uid,
@@ -46,7 +49,6 @@ function AuthProvider({ children }) {
         avatarUrl: userDoc.data().avatarUrl,
         role: userDoc.data().role,
       };
-
       setUser(data);
       storageUser(data);
       toast.success(`Bem-vindo(a) de volta!`);
@@ -58,12 +60,12 @@ function AuthProvider({ children }) {
     }
   };
 
+  // Função para cadastro
   const signUp = async (email, password, name, telefone, setor, role = 'user') => {
     setLoadingAuth(true);
     try {
       const { user: firebaseUser } = await createUserWithEmailAndPassword(auth, email, password);
       const uid = firebaseUser.uid;
-
       await setDoc(doc(db, "users", uid), {
         nome: name,
         telefone,
@@ -73,7 +75,6 @@ function AuthProvider({ children }) {
         role,
         lastActive: serverTimestamp(),
       });
-
       const data = {
         uid,
         nome: name,
@@ -82,7 +83,6 @@ function AuthProvider({ children }) {
         avatarUrl: null,
         role,
       };
-
       setUser(data);
       storageUser(data);
       toast.success("Seja bem-vindo ao sistema!");
@@ -94,23 +94,23 @@ function AuthProvider({ children }) {
     }
   };
 
+  // Função para atualizar a senha
   const updateUserPassword = async (newPassword) => {
     if (!user) {
       toast.error("Usuário não autenticado!");
       return;
     }
-
+    console.log("UID antes da atualização:", user.uid); // Log para verificar o UID
     setLoadingAuth(true);
     try {
       const userAuth = auth.currentUser;
       await updatePassword(userAuth, newPassword);
-
       // Atualiza a senha no Firestore (opcional, se necessário)
       await setDoc(doc(db, "users", user.uid), {
         ...user,
         senha: newPassword,
       }, { merge: true });
-
+      console.log("UID após a atualização:", user.uid); // Log para verificar o UID
       toast.success("Senha atualizada com sucesso!");
       logout();
     } catch (error) {
@@ -120,6 +120,7 @@ function AuthProvider({ children }) {
     }
   };
 
+  // Função para redefinir a senha
   const resetPassword = async (email) => {
     setLoadingAuth(true);
     try {
@@ -132,10 +133,12 @@ function AuthProvider({ children }) {
     }
   };
 
+  // Função para armazenar o usuário no localStorage
   const storageUser = (data) => {
     localStorage.setItem('@ticketsPRO', JSON.stringify(data));
   };
 
+  // Função para logout
   const logout = async () => {
     await signOut(auth);
     localStorage.removeItem('@ticketsPRO');
@@ -143,6 +146,7 @@ function AuthProvider({ children }) {
     navigate("/");
   };
 
+  // Função para tratar erros
   const handleError = (error) => {
     console.error(error);
     let errorMessage = "Ops, algo deu errado!";

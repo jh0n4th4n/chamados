@@ -16,16 +16,18 @@ export default function Profile() {
   const [avatarUrl, setAvatarUrl] = useState(user?.avatarUrl || '');
   const [imageAvatar, setImageAvatar] = useState(null);
   const [nome, setNome] = useState(user?.nome || '');
-  const [email] = useState(user?.email || ''); 
-  const [role] = useState(user?.role || ''); 
+  const [email] = useState(user?.email || '');
+  const [role] = useState(user?.role || '');
 
+  // Atualiza os estados quando o usuário muda
   useEffect(() => {
     if (user) {
-      setAvatarUrl(user.avatarUrl);
-      setNome(user.nome);
+      setAvatarUrl(user.avatarUrl || avatar);
+      setNome(user.nome || '');
     }
   }, [user]);
 
+  // Valida e define a imagem selecionada
   const handleFile = (e) => {
     const image = e.target.files[0];
 
@@ -40,7 +42,10 @@ export default function Profile() {
     }
   };
 
+  // Faz o upload da imagem para o Firebase Storage
   const handleUpload = async () => {
+    if (!imageAvatar) return;
+
     const currentUid = user.uid;
     const uploadRef = ref(storage, `images/${currentUid}/${imageAvatar.name}`);
 
@@ -68,6 +73,7 @@ export default function Profile() {
     }
   };
 
+  // Atualiza as informações do usuário
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -77,17 +83,16 @@ export default function Profile() {
 
       if (imageAvatar) {
         await handleUpload();
-      } 
+      }
 
       if (nome !== user.nome) {
         await updateDoc(docRef, { nome: nome });
-        updatedUser.nome = nome; 
+        updatedUser.nome = nome;
         toast.success("Nome atualizado com sucesso!");
       }
 
       setUser(updatedUser);
       storageUser(updatedUser);
-
     } catch (error) {
       toast.error("Erro ao atualizar informações: " + error.message);
     }
