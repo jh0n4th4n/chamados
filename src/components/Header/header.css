@@ -108,6 +108,7 @@
   .sidebar a {
     text-align: center;
     float: none;
+    font-size: 7px;
   }
 
   .sidebar a svg {
