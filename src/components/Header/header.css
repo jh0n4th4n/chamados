@@ -106,9 +106,13 @@
   }
   
   .sidebar a {
-    text-align: center;
-    float: none;
+    justify-content: center;
     font-size: 7px;
+    border-radius: 8px;
+  }
+
+  .sidebar a:focus{
+    color: #6c8ce4;
   }
 
   .sidebar a svg {
