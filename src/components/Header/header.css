@@ -62,8 +62,6 @@
 @media screen and (max-width: 700px) {
   .sidebar {
     display: flex;
-    flex-direction: row;
-    font-size: 14px;
     width: 100%;
     height: auto;
   }
@@ -79,14 +77,11 @@
 
   .sidebar a {
     float: left;
-    font-size: .7rem;
-    padding: 10px;
-    display: block;
+    font-size: 0.5rem;
     width: 100%;
-    margin: 0;
-    text-align: center;
-    transition: ease-in-out 0.4s;
+    padding: 15px;
     letter-spacing: 1px;
+    overflow: auto;
   }
 
   .sidebar div {
