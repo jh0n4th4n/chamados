@@ -1,75 +1,87 @@
-
-.new{
+.new {
   float: right;
   margin-bottom: 1.5em;
   margin-top: 1.5em;
   background-color: #83bf02;
-  padding: 0.5em;
-  border-radius: 5px;
+  padding: 0.8em 1.5em;
+  border-radius: 8px;
   display: flex;
   justify-content: center;
   align-items: center;
-  border:0;
+  border: 0;
   font-weight: 600;
   color: #FFF;
-  transition: ease-in-out 0.3s;
+  transition: all 0.3s ease-in-out;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.new svg{
-  margin-right: 5px;
+.new svg {
+  margin-right: 8px;
 }
 
-.new:hover{
+.new:hover {
   background-color: #5fd204;
-  transform: scale(1.1);
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-.dashboard{
+.dashboard {
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: column;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin: 20px auto;
+  width: 90%;
+  max-width: 1200px;
 }
 
-.action:hover{
-  transform: scale(1.1);
+.action:hover {
+  transform: scale(1.05);
   cursor: pointer;
 }
 
 .feedback {
   background-color: #f0ad4e;
   color: white;
-  padding: 10px;
-  margin-bottom: 10px;
-  border-radius: 5px;
+  padding: 12px;
+  margin-bottom: 15px;
+  border-radius: 8px;
   text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.filters{
+.filters {
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-around;
+  margin-bottom: 20px;
 }
 
-.filters  select{
+.filters select {
   width: 20%;
   height: 50px;
   margin: 5px;
-  border-radius: 5px;
+  border-radius: 8px;
   outline: none;
-  border: none;
-  transition: ease-in-out 0.5s;
+  border: 1px solid #ddd;
+  transition: all 0.3s ease-in-out;
+  background-color: #f9f9f9;
+  padding: 10px;
+  font-size: 1em;
 }
 
-.filters  select:hover,
- .filters  input:hover{
-  background-color: #f3f3f3;
+.filters select:hover,
+.filters input:hover {
+  border-color: #0125f3;
   cursor: pointer;
-  border: 1px solid #181c2e;
 }
 
-.filters  input{
+.filters input {
   width: 15%;
   height: 50px;
   justify-content: center;
@@ -77,127 +89,161 @@
   display: flex;
   margin: 5px;
   outline: none;
-  border: none;
-  transition: ease-in-out 0.5s;
-  border-radius: 5px;
+  border: 1px solid #ddd;
+  transition: all 0.3s ease-in-out;
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 1em;
+  background-color: #f9f9f9;
 }
 
-
-table{
-  border: 1px solid #CCC;
+table {
+  border: 1px solid #ddd;
   margin: 0;
   padding: 0;
   width: 100%;
   table-layout: fixed;
   border-collapse: collapse;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-table caption{
+table caption {
   font-size: 1.5em;
-  margin: 0.5em 0  0.75em;
+  margin: 0.5em 0 0.75em;
+  font-weight: 600;
+  color: #333;
 }
 
-table tr{
-  background-color: #F8f8f8;
-  border:1px solid #DDD;
+table tr {
+  background-color: #f8f8f8;
+  border: 1px solid #ddd;
   padding: 0.35em;
 }
 
-table th, table td{
-  padding: 0.60em;
+table th, table td {
+  padding: 12px;
   text-align: center;
+  color: #555;
 }
 
-table thead th{
+table thead th {
   font-size: 1.1em;
   background-color: #f0efef;
+  color: #333;
+  font-weight: 600;
 }
 
-table th{
+table th {
   font-size: 0.85em;
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
-table tr:hover{
-  background-color: #f1f1f1;
+table tr:hover {
+  background-color: #f9f9f9;
   cursor: pointer;
   transition: background-color 0.3s ease;
   font-weight: 600;
-  border-bottom: 1px solid #9698a1;
 }
 
-table td .action{
-  border:0;
-  padding: 5px;
-  border-radius: 4px;
+table td .action {
+  border: 0;
+  padding: 8px 12px;
+  border-radius: 5px;
   display: inline-block;
-  margin-right: 3px;
+  margin-right: 5px;
+  background-color: #0125f3;
+  color: #fff;
+  font-size: 0.9em;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
-table td .action svg{
-  vertical-align: middle;
+table td .action:hover {
+  transform: scale(1.05);
+  background-color: #001875;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-table td .badge{
-  padding: 3px;
-  border-radius: 3px;
+table td .badge {
+  padding: 5px 10px;
+  border-radius: 5px;
   color: #FFF;
+  font-size: 0.9em;
 }
 
-.dashboard span{
+.dashboard span {
   margin: 2em 0;
   font-size: 1.2em;
   font-weight: 600;
+  color: #333;
 }
 
-.btn-more{
+.btn-more {
   margin: 1.5em 0;
-  padding: 0.5em 1em;
+  padding: 0.8em 1.5em;
   background-color: #181c2e;
-  border:0;
-  border-radius: 5px;
+  border: 0;
+  border-radius: 8px;
   font-size: 1.1em;
   color: #FFF;
+  transition: all 0.3s ease-in-out;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-@media screen and (max-width: 600px){
-    table{
-      border:0;
-    };
-
-    table caption{
-      font-size: 1.3em;
-    }
-
-    table thead{
-      border:none;
-      height: 1px;
-      margin: -1px;
-      overflow: hidden;
-      padding: 0;
-      position: absolute;
-      width: 1px;
-    }
-
-    table tr{
-      border-bottom: 3px solid #DDD;
-      display: block;
-      margin-bottom: 0.60em;
-    }
-
-    table td{
-      border-bottom: 1px solid #DDD;
-      display: block;
-      font-size: 0.8em;
-      text-align: right;
-    }
-
-    table td::before{
-      content: attr(data-label);
-      float: left;
-      font-weight: bold;
-      text-transform: uppercase;
-    }
+.btn-more:hover {
+  background-color: #0125f3;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
+@media screen and (max-width: 600px) {
+  table {
+    border: 0;
+  }
+
+  table caption {
+    font-size: 1.3em;
+  }
+
+  table thead {
+    border: none;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    width: 1px;
+  }
+
+  table tr {
+    border-bottom: 3px solid #ddd;
+    display: block;
+    margin-bottom: 0.60em;
+  }
+
+  table td {
+    border-bottom: 1px solid #ddd;
+    display: block;
+    font-size: 0.8em;
+    text-align: right;
+  }
+
+  table td::before {
+    content: attr(data-label);
+    float: left;
+    font-weight: bold;
+    text-transform: uppercase;
+  }
+
+  .filters {
+    flex-direction: column;
+  }
+
+  .filters select,
+  .filters input {
+    width: 100%;
+    margin: 5px 0;
+  }
+}
