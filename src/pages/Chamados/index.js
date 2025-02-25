@@ -1,12 +1,12 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState, useMemo } from 'react';
 import { AuthContext } from '../../contexts/auth';
 import Header from '../../components/Header';
 import Title from '../../components/Title';
-import { FiPlus, FiMessageSquare, FiEdit2, FiTrash2, FiSearch } from 'react-icons/fi';
+import { FiPlus, FiMessageSquare, FiEdit2, FiTrash2, FiSearch, FiX } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 import { collection, onSnapshot, query, orderBy, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../../services/firebaseConnection';
-import { format } from 'date-fns';
+import { format, isBefore, isAfter, isEqual } from 'date-fns';
 import Modal from '../../components/Modal';
 import './chamados.css';
 
@@ -25,8 +25,6 @@ export default function Chamados() {
 
   // Estados principais
   const [chamados, setChamados] = useState([]);
-  const [filteredChamados, setFilteredChamados] = useState([]);
-  const [assuntos, setAssuntos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isEmpty, setIsEmpty] = useState(false);
 
@@ -41,6 +39,7 @@ export default function Chamados() {
     dataInicio: '',
     dataFim: '',
     assunto: '',
+    cliente: '', // Novo filtro para buscar por cliente
   });
 
   // Carrega os chamados e popula o filtro de assuntos
@@ -51,46 +50,55 @@ export default function Chamados() {
         const lista = snapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
+          created: doc.data().created.toDate(), // Garante que created seja um objeto Date
           createdFormat: format(doc.data().created.toDate(), 'dd/MM/yyyy HH:mm:ss'),
         }));
 
         setChamados(lista);
-        setFilteredChamados(lista);
         setIsEmpty(lista.length === 0);
         setLoading(false);
-
-        // Popula os assuntos únicos
-        const uniqueAssuntos = Array.from(new Set(lista.map((chamado) => chamado.assunto)));
-        setAssuntos(uniqueAssuntos);
       }
     );
 
     return () => unsubscribe();
   }, []);
 
-  // Atualiza os chamados filtrados com base nos filtros aplicados
-  useEffect(() => {
-    const applyFilters = () => {
-      const { status, dataInicio, dataFim, assunto } = filters;
+  // Filtra os chamados com base nos filtros aplicados
+  const filteredChamados = useMemo(() => {
+    const { status, dataInicio, dataFim, assunto, cliente } = filters;
 
-      const filtered = chamados.filter((chamado) => {
-        const createdDate = chamado.created.toDate();
-        const matchStatus = status ? chamado.status === status : true;
-        const matchPeriodo = dataInicio
-          ? dataFim
-            ? createdDate >= new Date(dataInicio) && createdDate <= new Date(dataFim)
-            : format(createdDate, 'yyyy-MM-dd') === format(new Date(dataInicio), 'yyyy-MM-dd')
-          : true;
-        const matchAssunto = assunto ? chamado.assunto === assunto : true;
+    return chamados.filter((chamado) => {
+      const createdDate = chamado.created;
+      const matchStatus = status ? chamado.status === status : true;
+      const matchAssunto = assunto ? chamado.assunto === assunto : true;
+      const matchCliente = cliente
+        ? chamado.cliente.toLowerCase().includes(cliente.toLowerCase())
+        : true;
 
-        return matchStatus && matchPeriodo && matchAssunto;
-      });
+      // Filtro por período de datas
+      if (dataInicio && dataFim) {
+        const startDate = new Date(dataInicio);
+        const endDate = new Date(dataFim);
+        return (
+          matchStatus &&
+          matchAssunto &&
+          matchCliente &&
+          (isEqual(createdDate, startDate) ||
+            isEqual(createdDate, endDate) ||
+            (isAfter(createdDate, startDate) && isBefore(createdDate, endDate)))
+        );
+      } else if (dataInicio) {
+        const startDate = new Date(dataInicio);
+        return (
+          matchStatus &&
+          matchAssunto &&
+          matchCliente &&
+          isEqual(createdDate, startDate)
+        );
+      }
 
-      setFilteredChamados(filtered);
-      setVisibleCount(INITIAL_LIMIT); // Reseta a contagem de itens visíveis
-    };
-
-    applyFilters();
+      return matchStatus && matchAssunto && matchCliente;
+    });
   }, [filters, chamados]);
 
   // Funções auxiliares
@@ -107,6 +115,16 @@ export default function Chamados() {
 
   const handleFilterChange = (field, value) => {
     setFilters((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const clearFilters = () => {
+    setFilters({
+      status: '',
+      dataInicio: '',
+      dataFim: '',
+      assunto: '',
+      cliente: '', // Limpa o filtro de cliente
+    });
   };
 
   const renderStatusBadge = (status) => (
@@ -166,12 +184,21 @@ export default function Chamados() {
           />
           <select onChange={(e) => handleFilterChange('assunto', e.target.value)} value={filters.assunto}>
             <option value="">Todos os assuntos</option>
-            {assuntos.map((assunto, index) => (
+            {[...new Set(chamados.map((chamado) => chamado.assunto))].map((assunto, index) => (
               <option key={index} value={assunto}>
                 {assunto}
               </option>
             ))}
           </select>
+          <input
+            type="text"
+            placeholder="Buscar por cliente"
+            onChange={(e) => handleFilterChange('cliente', e.target.value)}
+            value={filters.cliente}
+          />
+          <button className="clear-filters" onClick={clearFilters}>
+            <FiX size={15} /> Limpar filtros
+          </button>
         </div>
 
         <hr />
@@ -234,10 +261,16 @@ export default function Chamados() {
                 ))}
               </tbody>
             </table>
-            {visibleCount < filteredChamados.length && (
+            {visibleCount < filteredChamados.length ? (
               <button className="btn-more" onClick={() => setVisibleCount((prev) => prev + INITIAL_LIMIT)}>
                 Buscar mais
               </button>
+            ) : (
+              visibleCount > INITIAL_LIMIT && (
+                <button className="btn-more" onClick={() => setVisibleCount(INITIAL_LIMIT)}>
+                  Mostrar menos
+                </button>
+              )
             )}
           </>
         )}
