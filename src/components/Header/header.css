@@ -1,121 +1,126 @@
+/* Sidebar */
 .sidebar {
-  width: 200px;
+  width: 250px;
   margin: 0;
   padding: 0;
-  background-color: #2b3458;
+  background: linear-gradient(135deg, #3b4a7d, #2b3458); /* Gradiente para um visual mais sofisticado */
   position: fixed;
   height: 100%;
   overflow: auto;
+  box-shadow: 4px 0 12px rgba(0, 0, 0, 0.15); /* Sombra suave para um efeito mais moderno */
+  transition: width 0.3s ease, box-shadow 0.3s ease;
 }
 
 .sidebar div {
   background: url("../../assets/cover.png");
-  background-color: #2b3458;
-  background-position: center;
-  background-repeat: no-repeat;
   background-size: cover;
-  height: 150px;
-}
-
-.sidebar div {
-  padding-top: 13px;
+  background-position: center;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: height 0.3s ease; /* Transição suave para a altura do cabeçalho */
 }
 
 .sidebar div img {
-  width: 120px;
-  height: 120px;
-  display: block;
-  margin: auto;
+  width: 130px;
+  height: 130px;
   border-radius: 50%;
   object-fit: cover;
-  filter: drop-shadow(2px 3px 6px #121212);
-  -webkit-filter: drop-shadow(2px 3px 6px #121212);
+  filter: drop-shadow(2px 3px 6px rgba(0, 0, 0, 0.3));
+  transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+.sidebar div img:hover {
+  transform: scale(1.15); /* Efeito de zoom suave */
+  filter: drop-shadow(4px 6px 12px rgba(0, 0, 0, 0.5)); /* Sombra mais intensa no hover */
 }
 
 .sidebar a {
-  display: block;
-  padding: 16px;
   display: flex;
-  text-decoration: none;
-  color: rgb(255, 255, 255);
-  font-weight: bold;
-  flex-direction: row;
   align-items: center;
-  transition: ease-in-out 0.4s;
-  letter-spacing: 2px;
+  padding: 16px 24px;
+  text-decoration: none;
+  color: #fff;
+  font-weight: 600;
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
+  border-left: 4px solid transparent;
+  font-size: 1rem;
 }
 
 .sidebar a svg {
-  margin-right: 0.5rem;
+  margin-right: 1rem;
+  font-size: 1.3rem;
 }
 
 .sidebar a:hover {
-  background-color: #121212;
+  background-color: rgba(0, 0, 0, 0.1);
   color: #6c8ce4;
+  border-left-color: #6c8ce4;
+  transform: translateX(8px); /* Deslocamento suave no hover */
+}
+
+.sidebar a.active {
+  background-color: rgba(0, 0, 0, 0.15);
+  color: #6c8ce4;
+  border-left-color: #6c8ce4;
+  padding-left: 30px; /* Adiciona um destaque maior ao item ativo */
 }
 
 .content {
-  margin-left: 200px;
-  padding: 25px 0.5rem;
+  margin-left: 250px;
+  padding: 25px 2rem;
+  transition: margin-left 0.3s ease;
+  background: #f5f5f5;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra leve para o conteúdo */
 }
 
-@media screen and (max-width: 700px) {
+/* Responsividade */
+@media screen and (max-width: 768px) {
   .sidebar {
-    display: flex;
-    width: 100%;
-    height: auto;
-  }
-
-  div.sidebar{
-    position: fixed;
-    overflow: auto;
-  }
-
-  div.content {
-    margin-left: 0;
-  }
-
-  .sidebar a {
-    float: left;
-    font-size: 0.5rem;
-    width: 100%;
-    padding: 15px;
-    letter-spacing: 1px;
-    overflow: auto;
-  }
-
-  .sidebar div {
-    display: none;
-  }
-
-  .sidebar a svg {
-    display: none;
-  }
-}
-
-@media screen and (max-width: 400px) {
-
-  .sidebar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
     width: 100%;
     height: auto;
     position: relative;
-  }
-  
-  .sidebar a {
-    justify-content: center;
-    font-size: 7px;
-    border-radius: 8px;
+    box-shadow: none;
   }
 
-  .sidebar a:focus{
-    color: #6c8ce4;
+  .sidebar div {
+    height: 160px;
+  }
+
+  .sidebar div img {
+    width: 100px;
+    height: 100px;
+  }
+
+  .sidebar a {
+    padding: 12px;
+    font-size: 0.9rem;
+    justify-content: center;
+    border-left: none;
+    border-bottom: 2px solid transparent;
+  }
+
+  .sidebar a:hover {
+    border-bottom-color: #6c8ce4;
+  }
+
+  .content {
+    margin-left: 0;
+    padding: 20px 1rem;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .sidebar a {
+    font-size: 0.8rem;
+    padding: 10px;
   }
 
   .sidebar a svg {
-    display: none;
+    margin-right: 0.5rem;
+    font-size: 1.1rem;
   }
 }
