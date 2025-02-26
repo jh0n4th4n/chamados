@@ -8,7 +8,7 @@ import { db, storage } from '../../services/firebaseConnection';
 import { doc, updateDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { toast } from 'react-toastify';
-import './profile.css';
+import '../Profile/profile.css'
 
 export default function Profile() {
   const { user, storageUser, setUser, logout } = useContext(AuthContext);

@@ -8,6 +8,7 @@ import { collection, onSnapshot, query, orderBy, deleteDoc, doc } from 'firebase
 import { db } from '../../services/firebaseConnection';
 import { format, isBefore, isAfter, isEqual } from 'date-fns';
 import Modal from '../../components/Modal';
+import Swal from 'sweetalert2'; // Importação do SweetAlert2
 import './chamados.css';
 
 // Limite inicial para a paginação
@@ -101,14 +102,36 @@ export default function Chamados() {
     });
   }, [filters, chamados]);
 
-  // Funções auxiliares
+  // Função para deletar chamado com SweetAlert2
   const handleDelete = async (id) => {
-    if (window.confirm('Você tem certeza que deseja deletar este chamado?')) {
+    const result = await Swal.fire({
+      title: 'Você tem certeza?',
+      text: 'Você não poderá reverter isso!',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sim, deletar!',
+      cancelButtonText: 'Cancelar',
+    });
+
+    if (result.isConfirmed) {
       try {
         await deleteDoc(doc(db, 'chamados', id));
         setChamados((prev) => prev.filter((chamado) => chamado.id !== id));
+
+        Swal.fire({
+          title: 'Deletado!',
+          text: 'O chamado foi deletado com sucesso.',
+          icon: 'success',
+        });
       } catch (error) {
         console.error('Erro ao deletar chamado:', error);
+        Swal.fire({
+          title: 'Erro!',
+          text: 'Ocorreu um erro ao deletar o chamado.',
+          icon: 'error',
+        });
       }
     }
   };

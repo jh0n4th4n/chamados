@@ -6,6 +6,7 @@ import { db } from '../../services/firebaseConnection';
 import { collection, onSnapshot, deleteDoc, doc, setDoc } from 'firebase/firestore';
 import { toast } from 'react-toastify';
 import { getAuth, createUserWithEmailAndPassword, sendPasswordResetEmail, deleteUser } from "firebase/auth";
+import Swal from 'sweetalert2'; // Importação do SweetAlert2
 import styles from './users.module.css';
 
 export default function Users() {
@@ -68,21 +69,34 @@ export default function Users() {
     return () => unsubscribe();
   }, []);
 
-  // Deleta um usuário
+  // Deleta um usuário com SweetAlert2
   const handleDelete = async (id, email) => {
-    if (!window.confirm("Tem certeza que deseja excluir este usuário?")) return;
+    const result = await Swal.fire({
+      title: 'Você tem certeza?',
+      text: 'Você não poderá reverter isso!',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sim, deletar!',
+      cancelButtonText: 'Cancelar',
+    });
 
-    try {
-      const auth = getAuth();
-      await deleteDoc(doc(db, "users", id));
+    if (result.isConfirmed) {
+      try {
+        const auth = getAuth();
+        await deleteDoc(doc(db, "users", id));
 
-      const user = auth.currentUser;
-      if (user && user.email === email) {
-        await deleteUser(user);
-        toast.success("Usuário excluído com sucesso!");
+        const user = auth.currentUser;
+        if (user && user.email === email) {
+          await deleteUser(user);
+        }
+
+        toast.success('Usuário excluído com sucesso!');
+      } catch (error) {
+        console.error('Erro ao deletar usuário:', error);
+        toast.error('Erro ao excluir usuário.');
       }
-    } catch (error) {
-      toast.error("Erro ao excluir o usuário: " + error.message);
     }
   };
 

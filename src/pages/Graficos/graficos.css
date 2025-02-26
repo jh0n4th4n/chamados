@@ -1,35 +1,33 @@
+/* Estilo geral */
 .dashboard {
+    width: 100%;
     display: flex;
     flex-direction: column;
-    width: 100%;
-    height: 100%;
+    gap: 20px;
     padding: 20px;
-    background-color: #f9f9f9;
+    box-sizing: border-box;
 }
 
-.subtitulo {
+.container {
     display: flex;
-    width: 100%;
-    flex-direction: row;
-    text-align: left;
+    flex-direction: column;
+    justify-content: space-between;
     align-items: center;
-    justify-content: left;
-    font-size: 24px;
-    font-weight: bold;
-    color: #333;
-    margin-bottom: 20px;
+    gap: 20px;
+    width: 100%;
+
 }
 
+/* Container dos gráficos */
 .chart-container {
     display: flex;
     flex-direction: column;
     width: 100%;
-    margin-top: 30px;
-    margin-bottom: 30px;
     background-color: #fff;
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
 }
 
 .chart-container h3 {
@@ -39,13 +37,13 @@
     margin-bottom: 20px;
 }
 
+/* Calendário e botões */
 .divCalendar {
     width: 100%;
-    margin-top: 15px;
-    margin-left: 15px;
     display: flex;
     align-items: center;
     gap: 10px;
+    margin-top: 15px;
 }
 
 .calendar {
@@ -81,25 +79,25 @@ button:hover {
     background-color: #6c6aa7;
 }
 
+/* Lista de setores */
 .sector-list {
-    margin-top: 20px;
     width: 100%;
+    margin-top: 20px;
 }
 
 .sector-list table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 10px;
     background-color: #fff;
     border-radius: 10px;
     overflow: hidden;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.sector-list th, .sector-list td {
-    border: 1px solid #ddd;
+.sector-list th,
+.sector-list td {
     padding: 12px;
-    text-align: left;
+    text-align: center;
 }
 
 .sector-list th {
@@ -116,6 +114,7 @@ button:hover {
     background-color: #f1f1f1;
 }
 
+/* Loading */
 .loading {
     display: flex;
     justify-content: center;
@@ -124,4 +123,51 @@ button:hover {
     font-weight: bold;
     color: #8884d8;
     margin-top: 20px;
+}
+
+/* Responsividade */
+@media screen and (max-width: 768px) {
+    .dashboard {
+        padding: 10px;
+    }
+
+    .divCalendar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .calendar {
+        width: 100%;
+    }
+
+    button {
+        width: 100%;
+    }
+
+    .chart-container {
+        padding: 15px;
+    }
+
+    .chart-container h3 {
+        font-size: 18px;
+    }
+
+    .sector-list th,
+    .sector-list td {
+        padding: 10px;
+        font-size: 0.9em;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .chart-container h3 {
+        font-size: 16px;
+    }
+
+    .sector-list th,
+    .sector-list td {
+        padding: 8px;
+        font-size: 0.8em;
+    }
 }

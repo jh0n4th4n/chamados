@@ -1,0 +1,180 @@
+/* Estilização geral */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f4f4f9;
+  margin: 0;
+  padding: 0;
+  color: #333;
+  line-height: 1.6;
+  display: flex;
+  flex-direction: column;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  max-width: 100%;
+  margin-left: 250px;
+  padding: 30px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+  transition: margin 0.3s ease;
+}
+
+.container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 25px;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+/* Formulário */
+.form-profile {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+}
+
+label {
+  font-weight: 600;
+  color: #444;
+  font-size: 1rem;
+  width: 100%;
+  text-align: center;
+}
+
+input, select, textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #555;
+  background-color: #f9f9f9;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  outline: none;
+}
+
+input:focus, select:focus, textarea:focus{
+  border-color: #007bff;
+  box-shadow: 0 0 8px rgba(0, 123, 255, 0.2);
+}
+
+textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+/* Botão */
+button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.2s, box-shadow 0.3s;
+  padding: 12px 20px;
+}
+
+button:hover {
+  background-color: #0056b3;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.2);
+}
+
+button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
+}
+
+/* Estilização do status */
+.status {
+  display: flex;
+  align-items: center;
+  gap: 50px;
+  font-size: 1rem;
+  margin-bottom: 20px;
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 10px;
+  transition: background 0.3s, border-color 0.3s;
+}
+
+.status input[type="radio"] {
+  margin: 10px;
+  cursor: pointer;
+  transform: scale(1.2);
+}
+
+/* Responsividade */
+@media (max-width: 1024px) {
+  .content {
+    margin-left: 0;
+    padding: 25px;
+  }
+}
+
+@media (max-width: 768px) {
+  .content {
+    width: 95%;
+    padding: 20px;
+    margin: 10px auto;
+  }
+
+  .container {
+    gap: 15px;
+  }
+
+  input, select, textarea {
+    font-size: 0.9rem;
+    padding: 10px;
+  }
+
+  button {
+    font-size: 0.9rem;
+    padding: 10px;
+  }
+
+  .status {
+    gap: 15px;
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 480px) {
+  .content {
+    padding: 15px;
+  }
+
+  .form-profile {
+    gap: 15px;
+  }
+
+  input, select, textarea {
+    padding: 8px;
+    font-size: 0.8rem;
+  }
+
+  button {
+    padding: 10px;
+    font-size: 0.8rem;
+  }
+
+  .status {
+    gap: 10px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

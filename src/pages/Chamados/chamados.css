@@ -21,7 +21,7 @@
 
 .new:hover {
   background-color: #5fd204;
-  transform: scale(1.05);
+  transform: scale(1.02);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
@@ -36,7 +36,7 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   margin: 20px auto;
   width: 90%;
-  max-width: 1200px;
+  /* max-width: 1200px; */
 }
 
 .action:hover {
@@ -96,6 +96,22 @@
   font-size: 1em;
   background-color: #f9f9f9;
 }
+
+.clear-filters{
+  margin-left: 10px;
+  padding: 8px 12px;
+  border-radius: 5px;
+  background-color: #8884d8;
+  color: white;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.clear-filters:hover{
+  background-color: #6c6aa7;
+}
+
 
 table {
   border: 1px solid #ddd;
@@ -206,6 +222,13 @@ table td .badge {
 
   table caption {
     font-size: 1.3em;
+  }
+
+  .clear-filters{
+    background-color: #6c6aa7;
+    width: 100%;
+    margin-top: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   }
 
   table thead {

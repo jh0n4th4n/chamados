@@ -6,6 +6,7 @@ import { auth, db } from '../../services/firebaseConnection';
 import { addDoc, collection, onSnapshot, deleteDoc, doc, setDoc } from 'firebase/firestore';
 import { toast } from 'react-toastify';
 import useAuth from '../../contexts/auth';
+import Swal from 'sweetalert2'; // Importação do SweetAlert2
 import styles from './customer.module.css'; // Usando CSS Module
 
 export default function Customers() {
@@ -62,11 +63,27 @@ export default function Customers() {
     return () => unsubscribe();
   }, [user]);
 
+  // Função para deletar cliente com SweetAlert2
   const handleDelete = useCallback(async (id) => {
-    const confirmDelete = window.confirm("Tem certeza que deseja excluir este cliente?");
-    if (confirmDelete) {
-      await deleteDoc(doc(db, "customers", id));
-      toast.success("Cliente excluído com sucesso!");
+    const result = await Swal.fire({
+      title: 'Você tem certeza?',
+      text: 'Você não poderá reverter isso!',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sim, deletar!',
+      cancelButtonText: 'Cancelar',
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await deleteDoc(doc(db, 'customers', id));
+        toast.success('Cliente excluído com sucesso!');
+      } catch (error) {
+        console.error('Erro ao deletar cliente:', error);
+        toast.error('Erro ao excluir cliente.');
+      }
     }
   }, []);
 
