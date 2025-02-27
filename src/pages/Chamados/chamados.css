@@ -215,6 +215,7 @@ table td .badge {
 }
 
 @media screen and (max-width: 600px) {
+
   table {
     border: 0;
   }
@@ -250,7 +251,8 @@ table td .badge {
     border-bottom: 1px solid #ddd;
     display: block;
     font-size: 0.8em;
-    text-align: right;
+    display: flex;
+    justify-content: center;
   }
 
   table td::before {
@@ -268,5 +270,12 @@ table td .badge {
   .filters input {
     width: 100%;
     margin: 5px 0;
+  }
+  .action {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 8px;
+    width: 33%;
   }
 }
