@@ -10,10 +10,21 @@ import Swal from 'sweetalert2'; // Importação do SweetAlert2
 import styles from './users.module.css';
 
 export default function Users() {
-  const [formData, setFormData] = useState({ nome: '', email: '', password: '', role: '' });
+  const [formData, setFormData] = useState({ nome: '', email: '', password: '', role: '', setor: '' });
   const [loading, setLoading] = useState(false);
   const [usuarios, setUsuarios] = useState([]);
   const [editId, setEditId] = useState(null);
+  const [nomesFantasia, setNomesFantasia] = useState([]); // Estado para armazenar os nomes fantasia
+
+  // Busca os nomes fantasia da tabela customers
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, "customers"), (snapshot) => {
+      const nomesFantasiaList = snapshot.docs.map((doc) => doc.data().nomeFantasia).filter(Boolean);
+      setNomesFantasia(nomesFantasiaList);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   // Atualiza os valores do formulário
   const handleChange = (e) => {
@@ -22,16 +33,16 @@ export default function Users() {
   };
 
   const clearForm = () => {
-    setFormData({ nome: '', email: '', password: '', role: '' });
+    setFormData({ nome: '', email: '', password: '', role: '', setor: '' });
     setEditId(null);
   };
 
   // Registra ou atualiza um usuário
   const handleRegister = async (e) => {
     e.preventDefault();
-    const { nome, email, password, role } = formData;
+    const { nome, email, password, role, setor } = formData;
 
-    if (!nome || !email || !role || (!editId && !password)) {
+    if (!nome || !email || !role || !setor || (!editId && !password)) {
       toast.error("Por favor, preencha todos os campos obrigatórios!");
       return;
     }
@@ -41,13 +52,13 @@ export default function Users() {
       const auth = getAuth();
 
       if (editId) {
-        await setDoc(doc(db, "users", editId), { nome, email, role });
+        await setDoc(doc(db, "users", editId), { nome, email, role, setor });
         toast.success("Usuário atualizado com sucesso!");
       } else {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const uid = userCredential.user.uid;
 
-        await setDoc(doc(db, "users", uid), { nome, email, role });
+        await setDoc(doc(db, "users", uid), { nome, email, role, setor });
         toast.success("Usuário cadastrado com sucesso!");
       }
 
@@ -164,6 +175,17 @@ export default function Users() {
                 <option value="user">User</option>
               </select>
             </label>
+            <label>
+              Setor do Usuário
+              <select name="setor" value={formData.setor} onChange={handleChange} required>
+                <option value="">Selecione o setor</option>
+                {nomesFantasia.map((nomeFantasia, index) => (
+                  <option key={index} value={nomeFantasia}>
+                    {nomeFantasia}
+                  </option>
+                ))}
+              </select>
+            </label>
             <button className={styles.salvar} type="submit" disabled={loading}>
               {loading ? "Salvando..." : "Salvar"}
             </button>
@@ -176,6 +198,7 @@ export default function Users() {
                   <th>Nome</th>
                   <th>Email</th>
                   <th>Role</th>
+                  <th>Setor</th>
                   <th>Ações</th>
                 </tr>
               </thead>
@@ -185,6 +208,7 @@ export default function Users() {
                     <td>{usuario.nome}</td>
                     <td>{usuario.email}</td>
                     <td>{usuario.role}</td>
+                    <td>{usuario.setor}</td>
                     <td>
                       <button
                         className={styles.action}
