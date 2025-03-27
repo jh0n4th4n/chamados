@@ -185,7 +185,7 @@ export default function Chamados() {
         <Title name="Chamados">
           <FiMessageSquare size={25} />
         </Title>
-        <hr />
+
 
         <div className="filters">
           <span>Filtros</span>
@@ -220,11 +220,11 @@ export default function Chamados() {
             value={filters.cliente}
           />
           <button className="clear-filters" onClick={clearFilters}>
-            <FiX size={15} /> Limpar filtros
+            <FiX size={15} />
           </button>
         </div>
 
-        <hr />
+
 
         {isEmpty ? (
           <div className="container dashboard">

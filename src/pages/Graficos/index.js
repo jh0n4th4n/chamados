@@ -20,7 +20,7 @@ const Graphs = () => {
     const [loading, setLoading] = useState(false);
 
     const colors = {
-        Atendido: "#82ca9d",
+        Atendido: "#57B4BA",
         Progresso: "#ffc658",
         Aberto: "#8884d8",
     };

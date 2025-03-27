@@ -1,0 +1,152 @@
+/* Container principal */
+.content {
+    padding: 5vw;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.container {
+    margin-top: 4vh;
+}
+
+/* Estilo geral do formulário */
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 2vh;
+    padding: 5vw;
+    background-color: #f9f9f9;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Títulos das seções */
+.form-title {
+    font-size: clamp(1.3em, 2vw, 1.8em);
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 1vh;
+}
+
+/* Inputs e textareas */
+.form-input,
+.form-textarea,
+.form-select,
+.form-input-file {
+    width: 100%;
+    padding: 1.2rem;
+    border-radius: 6px;
+    border: 1px solid ;
+    font-size: 1em;
+
+}
+
+.form-textarea {
+    height: 20vh;
+    resize: vertical;
+}
+
+/* Input file */
+.form-input-file {
+    border: none;
+    padding: 0.5rem;
+}
+
+/* Select */
+.form-select {
+    cursor: pointer;
+}
+
+/* Estilo para o botão de salvar */
+.form-button {
+    padding: 1rem 2rem;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1.1em;
+    transition: background-color 0.3s ease;
+}
+
+/* Efeito de hover no botão */
+.form-button:hover {
+    background-color: #45a049;
+}
+
+/* Alinhamento do formulário usando flexbox */
+.form > input,
+.form > textarea,
+.form > select,
+.form > button {
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+}
+
+/* Linha horizontal */
+hr {
+    margin: 2vh 0;
+}
+
+/* Responsividade */
+@media (min-width: 768px) {
+    .form {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 2vw;
+    }
+
+    /* Dividindo campos de formulário em duas colunas */
+    .form > .form-input,
+    .form > .form-select {
+        width: calc(50% - 1vw);
+    }
+
+    .form > .form-textarea {
+        width: 100%;
+    }
+
+    /* Ajuste para o botão de salvar */
+    .form-button {
+        width: auto;
+    }
+}
+
+@media (min-width: 1024px) {
+    /* Aumentando o tamanho dos inputs e espaçamento em telas maiores */
+    .form > .form-input,
+    .form > .form-select,
+    .form > .form-textarea {
+        font-size: 1.2em;
+        padding: 1.5rem;
+    }
+
+    .form-title {
+        font-size: clamp(1.5em, 2vw, 2em);
+    }
+
+    /* Colocando alguns campos em linha para telas maiores */
+    .form > .form-input,
+    .form > .form-select {
+        width: calc(33.33% - 1vw);
+    }
+
+    /* Ajustando a largura do botão */
+    .form-button {
+        width: auto;
+    }
+}
+
+@media (max-width: 767px) {
+    .form > .form-input,
+    .form > .form-select,
+    .form > .form-textarea {
+        width: 100%;
+    }
+
+    /* Ajuste de espaçamento entre os campos em dispositivos móveis */
+    .form {
+        padding: 4vw;
+    }
+}
