@@ -2,19 +2,21 @@ import { useContext, useEffect, useState, useMemo } from 'react';
 import { AuthContext } from '../../contexts/auth';
 import Header from '../../components/Header';
 import Title from '../../components/Title';
-import { FiPlus, FiMessageSquare, FiEdit2, FiTrash2, FiSearch, FiX } from 'react-icons/fi';
+import {
+  FiPlus, FiMessageSquare, FiEdit2, FiTrash2, FiSearch, FiX
+} from 'react-icons/fi';
 import { Link } from 'react-router-dom';
-import { collection, onSnapshot, query, orderBy, deleteDoc, doc } from 'firebase/firestore';
+import {
+  collection, onSnapshot, query, orderBy, deleteDoc, doc
+} from 'firebase/firestore';
 import { db } from '../../services/firebaseConnection';
 import { format, isBefore, isAfter, isEqual } from 'date-fns';
 import Modal from '../../components/Modal';
-import Swal from 'sweetalert2'; // Importação do SweetAlert2
+import Swal from 'sweetalert2';
 import './chamados.css';
 
-// Limite inicial para a paginação
 const INITIAL_LIMIT = 10;
 
-// Estilos de status reutilizáveis
 const STATUS_STYLES = {
   Aberto: { backgroundColor: '#5cb85c' },
   Progresso: { backgroundColor: '#f0ad4e' },
@@ -23,37 +25,35 @@ const STATUS_STYLES = {
 
 export default function Chamados() {
   const { user } = useContext(AuthContext);
-
-  // Estados principais
   const [chamados, setChamados] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isEmpty, setIsEmpty] = useState(false);
-
-  // Modal e detalhamento
   const [showPostModal, setShowPostModal] = useState(false);
   const [detail, setDetail] = useState(null);
-
-  // Paginação e Filtros
   const [visibleCount, setVisibleCount] = useState(INITIAL_LIMIT);
   const [filters, setFilters] = useState({
     status: '',
     dataInicio: '',
     dataFim: '',
     assunto: '',
-    cliente: '', // Novo filtro para buscar por cliente
+    cliente: '',
   });
 
-  // Carrega os chamados e popula o filtro de assuntos
   useEffect(() => {
     const unsubscribe = onSnapshot(
       query(collection(db, 'chamados'), orderBy('created', 'desc')),
       (snapshot) => {
-        const lista = snapshot.docs.map((doc) => ({
+        let lista = snapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
-          created: doc.data().created.toDate(), // Garante que created seja um objeto Date
-          createdFormat: format(doc.data().created.toDate(), 'dd/MM/yyyy HH:mm:ss'),
+          created: doc.data().created?.toDate?.() || new Date(),
+          createdFormat: format(doc.data().created?.toDate?.() || new Date(), 'dd/MM/yyyy HH:mm:ss'),
         }));
+
+        // ✅ Filtro por setor para usuários comuns (feito no useEffect!)
+        if (user.role !== 'admin') {
+          lista = lista.filter((item) => item.setor === user.setor);
+        }
 
         setChamados(lista);
         setIsEmpty(lista.length === 0);
@@ -62,9 +62,8 @@ export default function Chamados() {
     );
 
     return () => unsubscribe();
-  }, []);
+  }, [user]);
 
-  // Filtra os chamados com base nos filtros aplicados
   const filteredChamados = useMemo(() => {
     const { status, dataInicio, dataFim, assunto, cliente } = filters;
 
@@ -76,7 +75,6 @@ export default function Chamados() {
         ? chamado.cliente.toLowerCase().includes(cliente.toLowerCase())
         : true;
 
-      // Filtro por período de datas
       if (dataInicio && dataFim) {
         const startDate = new Date(dataInicio);
         const endDate = new Date(dataFim);
@@ -90,19 +88,13 @@ export default function Chamados() {
         );
       } else if (dataInicio) {
         const startDate = new Date(dataInicio);
-        return (
-          matchStatus &&
-          matchAssunto &&
-          matchCliente &&
-          isEqual(createdDate, startDate)
-        );
+        return matchStatus && matchAssunto && matchCliente && isEqual(createdDate, startDate);
       }
 
       return matchStatus && matchAssunto && matchCliente;
     });
   }, [filters, chamados]);
 
-  // Função para deletar chamado com SweetAlert2
   const handleDelete = async (id) => {
     const result = await Swal.fire({
       title: 'Você tem certeza?',
@@ -146,7 +138,7 @@ export default function Chamados() {
       dataInicio: '',
       dataFim: '',
       assunto: '',
-      cliente: '', // Limpa o filtro de cliente
+      cliente: '',
     });
   };
 
@@ -156,7 +148,6 @@ export default function Chamados() {
     </span>
   );
 
-  // Exibe o modal com os detalhes
   const toggleModal = (item) => {
     setDetail(item);
     setShowPostModal(!showPostModal);
@@ -186,7 +177,6 @@ export default function Chamados() {
           <FiMessageSquare size={25} />
         </Title>
 
-
         <div className="filters">
           <span>Filtros</span>
           <select onChange={(e) => handleFilterChange('status', e.target.value)} value={filters.status}>
@@ -208,9 +198,7 @@ export default function Chamados() {
           <select onChange={(e) => handleFilterChange('assunto', e.target.value)} value={filters.assunto}>
             <option value="">Todos os assuntos</option>
             {[...new Set(chamados.map((chamado) => chamado.assunto))].map((assunto, index) => (
-              <option key={index} value={assunto}>
-                {assunto}
-              </option>
+              <option key={index} value={assunto}>{assunto}</option>
             ))}
           </select>
           <input
@@ -223,8 +211,6 @@ export default function Chamados() {
             <FiX size={15} />
           </button>
         </div>
-
-
 
         {isEmpty ? (
           <div className="container dashboard">
@@ -246,6 +232,8 @@ export default function Chamados() {
                   <th>Cliente</th>
                   <th>Assunto</th>
                   <th>Status</th>
+                  <th>Usuário</th>
+                  <th>Setor</th>
                   <th>Cadastrado em</th>
                   <th>Ações</th>
                 </tr>
@@ -256,6 +244,8 @@ export default function Chamados() {
                     <td>{item.cliente}</td>
                     <td>{item.assunto}</td>
                     <td>{renderStatusBadge(item.status)}</td>
+                    <td>{item.usuario || '—'}</td>
+                    <td>{item.setor || '—'}</td>
                     <td>{item.createdFormat}</td>
                     <td>
                       <button
@@ -284,6 +274,7 @@ export default function Chamados() {
                 ))}
               </tbody>
             </table>
+
             {visibleCount < filteredChamados.length ? (
               <button className="btn-more" onClick={() => setVisibleCount((prev) => prev + INITIAL_LIMIT)}>
                 Buscar mais

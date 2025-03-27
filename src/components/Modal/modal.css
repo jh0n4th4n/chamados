@@ -1,86 +1,209 @@
 .modal {
   position: fixed;
-  top: 0;
-  bottom: 0;
-  right: 0;
-  left: 0;
+  inset: 0;
   background-color: rgba(0, 0, 0, 0.6);
-  z-index: 99;
-}
-
-.modal .container {
-  position: fixed;
-  max-width: 600px;
-  top: 15%;
-  left: 0;
-  right: 0;
-  margin: 0 auto;
-  padding: 4em 2em;
-  background-color: #fff;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
-}
-
-.close,
-.print {
-  background-color: #f65835;
-  border: 0;
-  border-radius: 5px;
+  z-index: 1000;
   display: flex;
   justify-content: center;
+  align-items: flex-start;
+  overflow-y: auto;
+  padding: 4rem 1.5rem;
+  backdrop-filter: blur(2px);
+}
+
+/* Container principal */
+.modal .container {
+  position: relative;
+  width: 100%;
+  max-width: 680px;
+  background-color: #ffffff;
+  border-radius: 16px;
+  padding: 3rem 2rem 2rem;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  animation: fadeIn 0.3s ease-out;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  transition: all 0.3s ease-in-out;
+}
+
+/* Área dos botões no topo */
+.modal-buttons {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  right: 1rem;
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  padding: 4px 15px;
+  z-index: 10;
+}
+
+/* Grupo à esquerda: voltar + imprimir */
+.modal-buttons-left {
+  display: flex;
+  gap: 1rem;
+}
+
+/* Grupo à direita: fechar */
+.modal-buttons-right {
+  display: flex;
+}
+
+/* Botões */
+.back,
+.print,
+.close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.25rem;
+  font-size: 0.95rem;
+  font-weight: 600;
   color: #fff;
+  border: none;
+  border-radius: 8px;
   cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  min-width: 100px;
+}
+
+.back {
+  background-color: #6c757d;
+}
+.back:hover {
+  background-color: #5a6268;
+  transform: translateY(-1px);
+}
+
+.print {
+  background-color: #007bff;
+}
+.print:hover {
+  background-color: #0056b3;
+  transform: translateY(-1px);
 }
 
 .close {
-  position: absolute;
-  top: 15px;
-  left: 15px;
+  background-color: #f44336;
+}
+.close:hover {
+  background-color: #d32f2f;
+  transform: translateY(-1px);
 }
 
-.print {
-  background-color: #0003ab;
-  position: absolute;
-  top: 15px;
-  left: 120px;
-}
-
-.close svg {
-  margin-right: 5px;
-}
-
+/* Títulos */
 .modal h2 {
-  margin-bottom: 1.2em;
+  font-size: clamp(1.6rem, 2.5vw, 2rem);
+  font-weight: 700;
+  color: #1f1f1f;
+  border-left: 5px solid #4caf50;
+  padding-left: 1rem;
+  margin-bottom: 0.5rem;
+  margin-top: 3.5rem; /* espaço abaixo dos botões */
+}
+
+/* Seções e conteúdo */
+.modal-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 .modal span {
   display: flex;
-  flex-direction: row;
-  font-weight: bold;
-  font-size: 1.1em;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  font-weight: 600;
+  font-size: 1.05rem;
+  color: #333;
 }
 
 .modal span i {
-  display: flex;
-  flex-direction: column;
+  font-style: normal;
   font-weight: 400;
-  margin-right: 1em;
-  padding: 2px 8px;
-}
-
-.row {
-  margin-bottom: 1em;
-  margin-top: 15px;
+  background-color: #f1f1f1;
+  padding: 0.4rem 1rem;
+  border-radius: 8px;
+  color: #333;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .modal p {
-  padding-top: 0.5em;
   white-space: pre-wrap;
-  line-height: 150%;
+  line-height: 1.7;
+  color: #444;
+  font-size: 1rem;
+  margin-top: 0.25rem;
+}
+
+.row {
+  margin: 1.5rem 0;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 1rem;
 }
 
 .status-badge {
-  margin-left: 1em;
-  border-radius: 2px;
+  margin-left: 0.75rem;
+  padding: 0.4rem 0.9rem;
+  background-color: #e0e0e0;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #333;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsividade */
+@media (max-width: 600px) {
+  .modal .container {
+    padding: 2rem 1rem;
+  }
+
+  .modal h2 {
+    font-size: 1.4rem;
+    margin-top: 5rem;
+  }
+
+  .modal-buttons {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .modal-buttons-left {
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .modal-buttons-right {
+    justify-content: flex-end;
+  }
+
+  .back,
+  .print,
+  .close {
+    width: 100%;
+    min-width: unset;
+    justify-content: center;
+    font-size: 1rem;
+  }
+
+  .modal span {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }

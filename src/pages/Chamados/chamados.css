@@ -219,6 +219,15 @@ table td .badge {
     font-size: 1.3em;
   }
 
+  .new{
+    width: 100%;
+    justify-content: center;
+  }
+
+  .filters {
+    display: none;
+  }
+
   .clear-filters{
     background-color: #6c6aa7;
     width: 100%;
@@ -256,16 +265,7 @@ table td .badge {
     font-weight: bold;
     text-transform: uppercase;
   }
-
-  .filters {
-    flex-direction: column;
-  }
-
-  .filters select,
-  .filters input {
-    width: 100%;
-    margin: 5px 0;
-  }
+  
   .action {
     flex-direction: column;
     align-items: center;

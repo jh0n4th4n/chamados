@@ -1,23 +1,9 @@
-import { useEffect, useState } from 'react';
 import { FiX, FiPrinter } from 'react-icons/fi';
 import { jsPDF } from 'jspdf';
-import { getAuth } from 'firebase/auth';
 import './modal.css';
 import Logo from '../../assets/Logo HRJN.png';
+
 export default function Modal({ conteudo, close }) {
-  const [nomeUsuario, setNomeUsuario] = useState('');
-
-  useEffect(() => {
-    const auth = getAuth();
-    const user = auth.currentUser;
-
-    if (user && user.displayName) {
-      setNomeUsuario(user.displayName);
-    } else {
-      setNomeUsuario('Nome do usuário indisponível');
-    }
-  }, []);
-
   const handlePrint = () => {
     const doc = new jsPDF();
 
@@ -28,7 +14,7 @@ export default function Modal({ conteudo, close }) {
       const pageWidth = doc.internal.pageSize.getWidth();
       const pageHeight = doc.internal.pageSize.getHeight();
 
-      // Adicionando logo centralizado
+      // Logo centralizado
       const logoWidth = 50;
       const logoX = (pageWidth - logoWidth) / 2;
       doc.addImage(logo, 'JPEG', logoX, 10, logoWidth, 20);
@@ -43,17 +29,16 @@ export default function Modal({ conteudo, close }) {
       doc.setLineWidth(0.5);
       doc.line(10, 50, pageWidth - 10, 50);
 
-      // Informações principais
+      // Informações
       doc.setFontSize(12);
       doc.setFont("helvetica", "normal");
       const startY = 60;
       const rowHeight = 10;
 
-      // Dados com alinhamento
       const fields = [
         ["Unidade:", "Hospital Regional Jesus Nazareno - FUSAM"],
         ["Cliente:", conteudo.cliente || 'N/A'],
-        ["Usuário:", nomeUsuario || 'Jhonathan Lucas'],
+        ["Usuário:", conteudo.usuario || 'N/A'],
         ["Assunto:", conteudo.assunto || 'N/A'],
         ["Cadastrado em:", conteudo.createdFormat || 'N/A'],
         ["Status:", conteudo.status || 'N/A'],
@@ -67,7 +52,7 @@ export default function Modal({ conteudo, close }) {
         doc.text(value, 60, y);
       });
 
-      // Complemento formatado com quebra de linha
+      // Complemento
       if (conteudo.complemento) {
         doc.setFont("helvetica", "bold");
         const complementoLabelY = startY + fields.length * rowHeight;
@@ -78,14 +63,13 @@ export default function Modal({ conteudo, close }) {
         doc.text(complementoText, 10, complementoY);
       }
 
-      // Rodapé com data e página
+      // Rodapé
       const footerY = pageHeight - 10;
       doc.setFontSize(10);
       const currentDate = new Date().toLocaleString();
       doc.text(`Relatório impresso em: ${currentDate}`, 10, footerY);
       doc.text(`Página ${doc.internal.getCurrentPageInfo().pageNumber}`, pageWidth - 20, footerY, { align: 'right' });
 
-      // Salvar o PDF
       doc.save('O.S (TI) HRJN.pdf');
     };
 
@@ -97,22 +81,32 @@ export default function Modal({ conteudo, close }) {
   return (
     <div className="modal">
       <div className="container">
-        <button className="close" onClick={close}>
-          <FiX size={25} color="#FFF" />
-          Voltar
-        </button>
-        <button className="print" onClick={handlePrint}>
-          <FiPrinter size={25} color="#FFF" />
-          Imprimir
-        </button>
+        <div className="modal-buttons-left">
+          <button className="close" onClick={close}>
+            <FiX size={20} color="#FFF" />
+            Fechar
+          </button>
+          <button className="print" onClick={handlePrint}>
+            <FiPrinter size={20} color="#FFF" />
+            Imprimir
+          </button>
+        </div>
+
         <main>
           <h2>Detalhes do chamado</h2>
           <div className="row"><span>Unidade: <i>Hospital Regional Jesus Nazareno - FUSAM</i></span></div>
           <div className="row"><span>Cliente: <i>{conteudo.cliente}</i></span></div>
-          <div className="row"><span>Usuário: <i>{nomeUsuario}</i></span></div>
+          <div className="row"><span>Usuário: <i>{conteudo.usuario || 'Usuário não informado'}</i></span></div>
           <div className="row"><span>Assunto: <i>{conteudo.assunto}</i></span></div>
           <div className="row"><span>Cadastrado em: <i>{conteudo.createdFormat}</i></span></div>
-          <div className="row"><span>Status: <i className="status-badge" style={{ color: "#FFF", backgroundColor: conteudo.status === 'Aberto' ? '#5cb85c' : '#999' }}>{conteudo.status}</i></span></div>
+          <div className="row">
+            <span>Status:
+              <i className="status-badge" style={{ backgroundColor: conteudo.status === 'Aberto' ? '#5cb85c' : '#999' }}>
+                {conteudo.status}
+              </i>
+            </span>
+          </div>
+
           {conteudo.complemento && (
             <>
               <h3>Complemento</h3>

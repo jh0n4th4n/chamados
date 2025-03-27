@@ -3,150 +3,158 @@
     padding: 5vw;
     max-width: 1200px;
     margin: 0 auto;
-}
-
-.container {
+  }
+  
+  /* Bloco que separa o conteúdo do topo */
+  .container {
     margin-top: 4vh;
-}
-
-/* Estilo geral do formulário */
-.form {
+  }
+  
+  /* Estilo geral do formulário */
+  .form {
     display: flex;
     flex-direction: column;
-    gap: 2vh;
-    padding: 5vw;
-    background-color: #f9f9f9;
+    gap: 2rem;
+    padding: 3rem 2rem;
+    background-color: #fefefe;
     border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-/* Títulos das seções */
-.form-title {
-    font-size: clamp(1.3em, 2vw, 1.8em);
-    font-weight: 600;
-    color: #333;
-    margin-bottom: 1vh;
-}
-
-/* Inputs e textareas */
-.form-input,
-.form-textarea,
-.form-select,
-.form-input-file {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+  }
+  
+  /* Título da seção */
+  .form-title {
+    font-size: clamp(1.5rem, 2.5vw, 2rem);
+    font-weight: 700;
+    color: #222;
+    margin-bottom: 1rem;
+    border-left: 5px solid #4caf50;
+    padding-left: 0.75rem;
+  }
+  
+  /* Inputs padrão */
+  .form-input,
+  .form-textarea,
+  .form-select,
+  .form-input-file {
     width: 100%;
-    padding: 1.2rem;
-    border-radius: 6px;
-    border: 1px solid ;
-    font-size: 1em;
-
-}
-
-.form-textarea {
+    padding: 1rem 1.25rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    transition: border-color 0.3s ease, box-shadow 0.2s ease;
+    background-color: #fff;
+  }
+  
+  /* Efeito de foco nos inputs */
+  .form-input:focus,
+  .form-textarea:focus,
+  .form-select:focus {
+    border-color: #4caf50;
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+    outline: none;
+  }
+  
+  /* Área de texto */
+  .form-textarea {
     height: 20vh;
     resize: vertical;
-}
-
-/* Input file */
-.form-input-file {
-    border: none;
+  }
+  
+  /* Input file */
+  .form-input-file {
     padding: 0.5rem;
-}
-
-/* Select */
-.form-select {
-    cursor: pointer;
-}
-
-/* Estilo para o botão de salvar */
-.form-button {
-    padding: 1rem 2rem;
-    background-color: #4CAF50;
-    color: white;
+    background-color: #fafafa;
     border: none;
-    border-radius: 6px;
+  }
+  
+  /* Select */
+  .form-select {
     cursor: pointer;
+    appearance: none;
+  }
+  
+  /* Botão salvar */
+  .form-button {
+    padding: 1rem 2rem;
+    background-color: #4caf50;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
     font-size: 1.1em;
-    transition: background-color 0.3s ease;
-}
-
-/* Efeito de hover no botão */
-.form-button:hover {
-    background-color: #45a049;
-}
-
-/* Alinhamento do formulário usando flexbox */
-.form > input,
-.form > textarea,
-.form > select,
-.form > button {
+    font-weight: 600;
+    cursor: pointer;
+    align-self: flex-start;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+  }
+  
+  .form-button:hover {
+    background-color: #388e3c;
+    transform: translateY(-2px);
+  }
+  
+  /* Separação dos elementos */
+  .form > * {
     display: flex;
     flex-direction: column;
-    gap: 1vh;
-}
-
-/* Linha horizontal */
-hr {
-    margin: 2vh 0;
-}
-
-/* Responsividade */
-@media (min-width: 768px) {
+    gap: 0.5rem;
+  }
+  
+  /* Linha de separação */
+  hr {
+    margin: 2rem 0;
+    border: none;
+    border-top: 1px solid #e0e0e0;
+  }
+  
+  /* Responsividade */
+  @media (min-width: 768px) {
     .form {
-        flex-direction: row;
-        flex-wrap: wrap;
-        gap: 2vw;
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 2vw;
     }
-
-    /* Dividindo campos de formulário em duas colunas */
+  
     .form > .form-input,
     .form > .form-select {
-        width: calc(50% - 1vw);
+      width: calc(50% - 1vw);
     }
-
+  
     .form > .form-textarea {
-        width: 100%;
+      width: 100%;
     }
-
-    /* Ajuste para o botão de salvar */
+  
     .form-button {
-        width: auto;
+      width: auto;
+      align-self: flex-end;
+      margin-top: auto;
     }
-}
-
-@media (min-width: 1024px) {
-    /* Aumentando o tamanho dos inputs e espaçamento em telas maiores */
+  }
+  
+  @media (min-width: 1024px) {
+    .form > .form-input,
+    .form > .form-select {
+      width: calc(33.33% - 1vw);
+    }
+  
+    .form > .form-textarea {
+      width: 100%;
+    }
+  
+    .form-button {
+      font-size: 1.15em;
+    }
+  }
+  
+  @media (max-width: 767px) {
+    .form {
+      padding: 5vw;
+    }
+  
     .form > .form-input,
     .form > .form-select,
     .form > .form-textarea {
-        font-size: 1.2em;
-        padding: 1.5rem;
+      width: 100%;
     }
-
-    .form-title {
-        font-size: clamp(1.5em, 2vw, 2em);
-    }
-
-    /* Colocando alguns campos em linha para telas maiores */
-    .form > .form-input,
-    .form > .form-select {
-        width: calc(33.33% - 1vw);
-    }
-
-    /* Ajustando a largura do botão */
-    .form-button {
-        width: auto;
-    }
-}
-
-@media (max-width: 767px) {
-    .form > .form-input,
-    .form > .form-select,
-    .form > .form-textarea {
-        width: 100%;
-    }
-
-    /* Ajuste de espaçamento entre os campos em dispositivos móveis */
-    .form {
-        padding: 4vw;
-    }
-}
+  }
+  
