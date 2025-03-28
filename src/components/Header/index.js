@@ -11,12 +11,12 @@ export default function Header() {
   return (
     <div className="sidebar">
       <div>
-        <img 
-          src={user.avatarUrl || avatarImg} 
-          alt="Foto do usuário" 
+        <img
+          src={user.avatarUrl || avatarImg}
+          alt="Foto do usuário"
         />
       </div>
-
+      {/* Links exclusivos para todos usuarios */}
       <Link to="/dashboard">
         <FiHome color="#FFF" size={24} />
         Chamados
@@ -37,18 +37,21 @@ export default function Header() {
             <FiSlack color="#FFF" size={24} />
             Gráficos
           </Link>
+          <Link to="/contratos">
+            <FiBook color="#FFF" size={24} />
+            Contratos
+          </Link>
         </>
       )}
+
+      {/* Links exclusivos para todos usuarios */}
 
       <Link to="/profile">
         <FiSettings color="#FFF" size={24} />
         Perfil
       </Link>
 
-      <Link to="/contratos">
-        <FiBook color="#FFF" size={24} />
-        Contratos
-      </Link>
+
 
     </div>
   );

@@ -20,12 +20,16 @@ function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  // ✅ Define antes do useEffect
+  const storageUser = (data) => {
+    localStorage.setItem('@ticketsPRO', JSON.stringify(data));
+  };
+
   useEffect(() => {
     const loadUser = () => {
-      const storageUser = localStorage.getItem('@ticketsPRO');
-      if (storageUser) {
-        const parsedUser = JSON.parse(storageUser);
-        console.log("UID carregado:", parsedUser.uid);
+      const storageUserData = localStorage.getItem('@ticketsPRO');
+      if (storageUserData) {
+        const parsedUser = JSON.parse(storageUserData);
         setUser(parsedUser);
       }
       setLoading(false);
@@ -38,7 +42,13 @@ function AuthProvider({ children }) {
     try {
       const { user: firebaseUser } = await signInWithEmailAndPassword(auth, email, password);
       const uid = firebaseUser.uid;
-      const userDoc = await getDoc(doc(db, "users", uid));
+      const userDoc = await getDoc(doc(db, 'users', uid));
+
+      if (!userDoc.exists()) {
+        toast.error('Usuário não encontrado no banco de dados.');
+        setLoadingAuth(false);
+        return;
+      }
 
       const data = {
         uid,
@@ -47,12 +57,13 @@ function AuthProvider({ children }) {
         telefone: userDoc.data().telefone,
         avatarUrl: userDoc.data().avatarUrl,
         role: userDoc.data().role,
+        setor: userDoc.data().setor || 'Setor não definido',
       };
 
       setUser(data);
       storageUser(data);
       toast.success(`Bem-vindo(a) de volta!`);
-      navigate("/dashboard");
+      navigate('/dashboard');
     } catch (error) {
       handleError(error);
     } finally {
@@ -65,14 +76,11 @@ function AuthProvider({ children }) {
     try {
       const { user: firebaseUser } = await createUserWithEmailAndPassword(auth, email, password);
 
-      // ✅ Atualiza o displayName no Auth
-      await updateProfile(firebaseUser, {
-        displayName: name,
-      });
+      await updateProfile(firebaseUser, { displayName: name });
 
       const uid = firebaseUser.uid;
 
-      await setDoc(doc(db, "users", uid), {
+      await setDoc(doc(db, 'users', uid), {
         nome: name,
         telefone,
         avatarUrl: null,
@@ -89,12 +97,13 @@ function AuthProvider({ children }) {
         email: firebaseUser.email,
         avatarUrl: null,
         role,
+        setor,
       };
 
       setUser(data);
       storageUser(data);
-      toast.success("Seja bem-vindo ao sistema!");
-      navigate("/dashboard");
+      toast.success('Seja bem-vindo ao sistema!');
+      navigate('/dashboard');
     } catch (error) {
       handleError(error);
     } finally {
@@ -104,24 +113,21 @@ function AuthProvider({ children }) {
 
   const updateUserPassword = async (newPassword) => {
     if (!user) {
-      toast.error("Usuário não autenticado!");
+      toast.error('Usuário não autenticado!');
       return;
     }
 
-    console.log("UID antes da atualização:", user.uid);
     setLoadingAuth(true);
-
     try {
       const userAuth = auth.currentUser;
       await updatePassword(userAuth, newPassword);
 
-      await setDoc(doc(db, "users", user.uid), {
+      await setDoc(doc(db, 'users', user.uid), {
         ...user,
         senha: newPassword,
       }, { merge: true });
 
-      console.log("UID após a atualização:", user.uid);
-      toast.success("Senha atualizada com sucesso!");
+      toast.success('Senha atualizada com sucesso!');
       logout();
     } catch (error) {
       handleError(error);
@@ -134,7 +140,7 @@ function AuthProvider({ children }) {
     setLoadingAuth(true);
     try {
       await sendPasswordResetEmail(auth, email);
-      toast.success("E-mail de redefinição de senha enviado com sucesso!");
+      toast.success('E-mail de redefinição de senha enviado com sucesso!');
     } catch (error) {
       handleError(error);
     } finally {
@@ -142,24 +148,20 @@ function AuthProvider({ children }) {
     }
   };
 
-  const storageUser = (data) => {
-    localStorage.setItem('@ticketsPRO', JSON.stringify(data));
-  };
-
   const logout = async () => {
     await signOut(auth);
     localStorage.removeItem('@ticketsPRO');
     setUser(null);
-    navigate("/");
+    navigate('/');
   };
 
   const handleError = (error) => {
     console.error(error);
-    let errorMessage = "Ops, algo deu errado!";
+    let errorMessage = 'Ops, algo deu errado!';
     if (error.code === 'auth/user-not-found') {
-      errorMessage = "Usuário não encontrado!";
+      errorMessage = 'Usuário não encontrado!';
     } else if (error.code === 'auth/wrong-password') {
-      errorMessage = "Senha incorreta!";
+      errorMessage = 'Senha incorreta!';
     }
     toast.error(errorMessage);
   };

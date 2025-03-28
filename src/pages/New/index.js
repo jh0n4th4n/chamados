@@ -69,22 +69,12 @@ export default function New() {
     async function loadCustomers() {
       try {
         const snapshot = await getDocs(listRef);
-        let lista = [];
+        const lista = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          nomeFantasia: doc.data().nomeFantasia,
+        }));
 
-        snapshot.forEach((doc) => {
-          lista.push({
-            id: doc.id,
-            nomeFantasia: doc.data().nomeFantasia,
-          });
-        });
-
-        if (snapshot.empty) {
-          toast.warn("Nenhuma empresa encontrada");
-          setCustomers([]);
-        } else {
-          setCustomers(lista);
-        }
-
+        setCustomers(lista);
         setLoadCustomer(false);
 
         if (id) {
@@ -118,12 +108,12 @@ export default function New() {
   async function handleRegister(e) {
     e.preventDefault();
 
-    if (customerSelected === null || !customers[customerSelected]) {
+    const cliente = customers[customerSelected] || { nomeFantasia: user.setor, id: 'cliente_default' };
+
+    if (!cliente || !cliente.nomeFantasia) {
       toast.error("Selecione um cliente válido.");
       return;
     }
-
-    const cliente = customers[customerSelected];
 
     try {
       const baseData = {
@@ -133,7 +123,6 @@ export default function New() {
         complemento,
         status,
         userId: user.uid,
-        setor: user?.setor || 'Setor não informado',
       };
 
       if (idCustomer) {
@@ -146,11 +135,14 @@ export default function New() {
         }
 
         const chamadoExistente = chamadoSnap.data();
+        const finalizadoEm = status === 'Atendido' ? new Date() : chamadoExistente.finalizadoEm || null;
 
         await updateDoc(chamadoRef, {
           ...baseData,
-          usuario: chamadoExistente.usuario || 'Usuário original não identificado',
+          usuario: chamadoExistente.usuario || user?.nome || 'Usuário original não identificado',
+          setor: chamadoExistente.setor || user?.setor || 'Setor não informado',
           created: chamadoExistente.created,
+          finalizadoEm,
         });
 
         toast.success("Chamado atualizado com sucesso!");
@@ -158,6 +150,7 @@ export default function New() {
         await addDoc(collection(db, "chamados"), {
           ...baseData,
           usuario: user?.displayName || user?.nome || user?.email || 'Usuário não identificado',
+          setor: user?.setor || 'Setor não informado',
           created: new Date(),
         });
 
