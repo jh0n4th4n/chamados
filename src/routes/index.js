@@ -7,23 +7,28 @@ import New from '../pages/New';
 import Private from './Private';
 import Graphs from '../pages/Graficos';
 import Users from '../pages/Usuarios';
-import NotFound from '../pages/Acesso Negado'; // Importe seu componente de página 404
+import NotFound from '../pages/Acesso Negado';
 import Contratos from '../pages/Contratos';
 
 function RoutesApp() {
   return (
     <Routes>
       <Route path="/" element={<SignIn />} />
+
+      {/* Rotas acessíveis a todos os usuários logados */}
       <Route path="/dashboard" element={<Private><Chamados /></Private>} />
       <Route path="/profile" element={<Private><Profile /></Private>} />
       <Route path="/customers" element={<Private><Customers /></Private>} />
-      <Route path="/users" element={<Private><Users /></Private>} />
       <Route path="/new" element={<Private><New /></Private>} />
       <Route path="/new/:id" element={<Private><New /></Private>} />
-      <Route path="/graphs" element={<Private><Graphs /></Private>} />
-      <Route path="/contratos" element={<Private><Contratos /></Private>} />
 
-      <Route path="*" element={<NotFound />} /> {/* Rota para página não encontrada */}
+      {/* Rotas exclusivas para administradores */}
+      <Route path="/users" element={<Private role="admin"><Users /></Private>} />
+      <Route path="/graphs" element={<Private role="admin"><Graphs /></Private>} />
+      <Route path="/contratos" element={<Private role="admin"><Contratos /></Private>} />
+
+      {/* Página 404 */}
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }

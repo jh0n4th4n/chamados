@@ -20,23 +20,24 @@ function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  // ✅ Define antes do useEffect
+  // ✅ Salva o usuário no localStorage
   const storageUser = (data) => {
     localStorage.setItem('@ticketsPRO', JSON.stringify(data));
   };
 
+  // ✅ Carrega usuário salvo no localStorage
   useEffect(() => {
     const loadUser = () => {
       const storageUserData = localStorage.getItem('@ticketsPRO');
       if (storageUserData) {
-        const parsedUser = JSON.parse(storageUserData);
-        setUser(parsedUser);
+        setUser(JSON.parse(storageUserData));
       }
       setLoading(false);
     };
     loadUser();
   }, []);
 
+  // ✅ Login
   const signIn = async (email, password) => {
     setLoadingAuth(true);
     try {
@@ -56,13 +57,13 @@ function AuthProvider({ children }) {
         email: firebaseUser.email,
         telefone: userDoc.data().telefone,
         avatarUrl: userDoc.data().avatarUrl,
-        role: userDoc.data().role,
+        role: userDoc.data().role || 'user',
         setor: userDoc.data().setor || 'Setor não definido',
       };
 
       setUser(data);
       storageUser(data);
-      toast.success(`Bem-vindo(a) de volta!`);
+      toast.success('Bem-vindo(a) de volta!');
       navigate('/dashboard');
     } catch (error) {
       handleError(error);
@@ -71,16 +72,16 @@ function AuthProvider({ children }) {
     }
   };
 
+  // ✅ Cadastro
   const signUp = async (email, password, name, telefone, setor, role = 'user') => {
     setLoadingAuth(true);
     try {
       const { user: firebaseUser } = await createUserWithEmailAndPassword(auth, email, password);
-
       await updateProfile(firebaseUser, { displayName: name });
 
       const uid = firebaseUser.uid;
 
-      await setDoc(doc(db, 'users', uid), {
+      const userData = {
         nome: name,
         telefone,
         avatarUrl: null,
@@ -88,16 +89,13 @@ function AuthProvider({ children }) {
         setor,
         role,
         lastActive: serverTimestamp(),
-      });
+      };
+
+      await setDoc(doc(db, 'users', uid), userData);
 
       const data = {
         uid,
-        nome: name,
-        telefone,
-        email: firebaseUser.email,
-        avatarUrl: null,
-        role,
-        setor,
+        ...userData,
       };
 
       setUser(data);
@@ -111,6 +109,7 @@ function AuthProvider({ children }) {
     }
   };
 
+  // ✅ Atualizar senha
   const updateUserPassword = async (newPassword) => {
     if (!user) {
       toast.error('Usuário não autenticado!');
@@ -136,6 +135,7 @@ function AuthProvider({ children }) {
     }
   };
 
+  // ✅ Redefinir senha
   const resetPassword = async (email) => {
     setLoadingAuth(true);
     try {
@@ -148,6 +148,7 @@ function AuthProvider({ children }) {
     }
   };
 
+  // ✅ Logout
   const logout = async () => {
     await signOut(auth);
     localStorage.removeItem('@ticketsPRO');
@@ -155,6 +156,7 @@ function AuthProvider({ children }) {
     navigate('/');
   };
 
+  // ✅ Tratamento de erros
   const handleError = (error) => {
     console.error(error);
     let errorMessage = 'Ops, algo deu errado!';
