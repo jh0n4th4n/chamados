@@ -201,12 +201,14 @@ export default function Chamados() {
               <option key={index} value={assunto}>{assunto}</option>
             ))}
           </select>
-          <input
-            type="text"
-            placeholder="Buscar por cliente"
-            onChange={(e) => handleFilterChange('cliente', e.target.value)}
-            value={filters.cliente}
-          />
+          {user.role === 'admin' && (
+            <input
+              type="text"
+              placeholder="Buscar por cliente"
+              onChange={(e) => handleFilterChange('cliente', e.target.value)}
+              value={filters.cliente}
+            />
+          )}
           <button className="clear-filters" onClick={clearFilters}>
             <FiX size={15} />
           </button>
