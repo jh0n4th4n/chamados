@@ -55,12 +55,16 @@ form h1{
 }
 
 form button{
+  display: flex;
   height: 35px;
   border:0;
   border-radius: 4px;
   background-color: #181c2e;
   color: #FFF;
   font-size: 1.3rem;
+  align-items: center;
+  justify-content: center;
+  
 }
 
 .login a{
