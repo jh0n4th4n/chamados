@@ -2,6 +2,7 @@ import { useContext, useEffect, useState, useMemo } from 'react';
 import { AuthContext } from '../../contexts/auth';
 import Header from '../../components/Header';
 import Title from '../../components/Title';
+import Modal from '../../components/Modal';
 import {
   FiPlus, FiMessageSquare, FiEdit2, FiTrash2, FiSearch, FiX
 } from 'react-icons/fi';
@@ -11,9 +12,23 @@ import {
 } from 'firebase/firestore';
 import { db } from '../../services/firebaseConnection';
 import { format, isBefore, isAfter, isEqual } from 'date-fns';
-import Modal from '../../components/Modal';
 import Swal from 'sweetalert2';
-import './chamados.css';
+
+// Styled components agrupados em dois arquivos
+import {
+  Container,
+  FormProfile,
+  StyledInput,
+  StyledSelect,
+  TableContainer,
+  StyledTable,
+  LoadMoreButton,
+  ActionButton,
+  StyledButton,
+  Span
+} from '../../styles/styled-global';
+
+import { NewButton } from '../../styles/Buttons';
 
 const INITIAL_LIMIT = 10;
 
@@ -160,22 +175,6 @@ export default function Chamados() {
     setShowPostModal(!showPostModal);
   };
 
-  if (loading) {
-    return (
-      <div>
-        <Header />
-        <div className="content">
-          <Title name="Chamados">
-            <FiMessageSquare size={25} />
-          </Title>
-          <div className="container dashboard">
-            <span>Carregando chamados...</span>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div>
       <Header />
@@ -184,58 +183,51 @@ export default function Chamados() {
           <FiMessageSquare size={25} />
         </Title>
 
-        <div className="filters">
-          <span>Filtros</span>
-          <select onChange={(e) => handleFilterChange('status', e.target.value)} value={filters.status}>
-            <option value="">Todos os status</option>
-            <option value="Aberto">Aberto</option>
-            <option value="Progresso">Em Progresso</option>
-            <option value="Atendido">Atendido</option>
-          </select>
-          <input
-            type="date"
-            onChange={(e) => handleFilterChange('dataInicio', e.target.value)}
-            value={filters.dataInicio}
-          />
-          <input
-            type="date"
-            onChange={(e) => handleFilterChange('dataFim', e.target.value)}
-            value={filters.dataFim}
-          />
-          <select onChange={(e) => handleFilterChange('assunto', e.target.value)} value={filters.assunto}>
-            <option value="">Todos os assuntos</option>
-            {[...new Set(chamados.map((chamado) => chamado.assunto))].map((assunto, index) => (
-              <option key={index} value={assunto}>{assunto}</option>
-            ))}
-          </select>
-          {user.role === 'admin' && (
-            <input
-              type="text"
-              placeholder="Buscar por cliente"
-              onChange={(e) => handleFilterChange('cliente', e.target.value)}
-              value={filters.cliente}
+        <Container>
+          <FormProfile>
+            <Span>Filtros</Span>
+            <StyledSelect onChange={(e) => handleFilterChange('status', e.target.value)} value={filters.status}>
+              <option value="">Todos os status</option>
+              <option value="Aberto">Aberto</option>
+              <option value="Progresso">Em Progresso</option>
+              <option value="Atendido">Atendido</option>
+            </StyledSelect>
+            <StyledInput
+              type="date"
+              value={filters.dataInicio}
+              onChange={(e) => handleFilterChange('dataInicio', e.target.value)}
             />
-          )}
-          <button className="clear-filters" onClick={clearFilters}>
-            <FiX size={15} />
-          </button>
-        </div>
+            <StyledInput
+              type="date"
+              value={filters.dataFim}
+              onChange={(e) => handleFilterChange('dataFim', e.target.value)}
+            />
+            <StyledSelect onChange={(e) => handleFilterChange('assunto', e.target.value)} value={filters.assunto}>
+              <option value="">Todos os assuntos</option>
+              {[...new Set(chamados.map((chamado) => chamado.assunto))].map((assunto, index) => (
+                <option key={index} value={assunto}>{assunto}</option>
+              ))}
+            </StyledSelect>
+            {user.role === 'admin' && (
+              <StyledInput
+                type="text"
+                placeholder="Buscar por cliente"
+                value={filters.cliente}
+                onChange={(e) => handleFilterChange('cliente', e.target.value)}
+              />
+            )}
+            <StyledButton type="button" onClick={clearFilters}>
+              <FiX size={15} />
+            </StyledButton>
+          </FormProfile>
 
-        {isEmpty ? (
-          <div className="container dashboard">
-            <span>Nenhum chamado encontrado...</span>
-            <Link to="/new" className="new">
-              <FiPlus color="#FFF" size={25} />
-              Novo chamado
-            </Link>
-          </div>
-        ) : (
-          <>
-            <Link to="/new" className="new">
-              <FiPlus color="#FFF" size={25} />
-              Novo chamado
-            </Link>
-            <table>
+          <NewButton to="/new" className="new">
+            <FiPlus color="#FFF" size={25} />
+            Novo chamado
+          </NewButton>
+
+          <TableContainer>
+            <StyledTable>
               <thead>
                 <tr>
                   <th>Cliente</th>
@@ -244,7 +236,7 @@ export default function Chamados() {
                   <th>Usuário</th>
                   <th>Setor</th>
                   <th>Cadastrado em</th>
-                  <th>Encerrado em</th> {/* NOVA COLUNA */}
+                  <th>Encerrado em</th>
                   <th>Ações</th>
                 </tr>
               </thead>
@@ -257,48 +249,42 @@ export default function Chamados() {
                     <td>{item.usuario || '—'}</td>
                     <td>{item.setor || '—'}</td>
                     <td>{item.createdFormat}</td>
-                    <td>{item.finalizadoFormat}</td> {/* NOVA COLUNA */}
+                    <td>{item.finalizadoFormat}</td>
                     <td>
-                      <button
-                        className="action"
-                        style={{ backgroundColor: '#3583f6' }}
-                        onClick={() => toggleModal(item)}
-                      >
+                      <ActionButton style={{ backgroundColor: '#3583f6' }} onClick={() => toggleModal(item)}>
                         <FiSearch color="#FFF" size={17} />
-                      </button>
+                      </ActionButton>
                       {(user.role === 'admin' || item.userId === user.uid) && (
-                        <Link to={`/new/${item.id}`} className="action" style={{ backgroundColor: '#f6a935' }}>
-                          <FiEdit2 color="#FFF" size={17} />
+                        <Link to={`/new/${item.id}`}>
+                          <ActionButton style={{ backgroundColor: '#f6a935' }}>
+                            <FiEdit2 color="#FFF" size={17} />
+                          </ActionButton>
                         </Link>
                       )}
                       {user.role === 'admin' && (
-                        <button
-                          className="action"
-                          style={{ backgroundColor: '#d9534f' }}
-                          onClick={() => handleDelete(item.id)}
-                        >
+                        <ActionButton style={{ backgroundColor: '#d9534f' }} onClick={() => handleDelete(item.id)}>
                           <FiTrash2 color="#FFF" size={17} />
-                        </button>
+                        </ActionButton>
                       )}
                     </td>
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </StyledTable>
 
             {visibleCount < filteredChamados.length ? (
-              <button className="btn-more" onClick={() => setVisibleCount((prev) => prev + INITIAL_LIMIT)}>
+              <LoadMoreButton onClick={() => setVisibleCount((prev) => prev + INITIAL_LIMIT)}>
                 Buscar mais
-              </button>
+              </LoadMoreButton>
             ) : (
               visibleCount > INITIAL_LIMIT && (
-                <button className="btn-more" onClick={() => setVisibleCount(INITIAL_LIMIT)}>
+                <LoadMoreButton onClick={() => setVisibleCount(INITIAL_LIMIT)}>
                   Mostrar menos
-                </button>
+                </LoadMoreButton>
               )
             )}
-          </>
-        )}
+          </TableContainer>
+        </Container>
 
         {showPostModal && <Modal conteudo={detail} close={() => setShowPostModal(false)} />}
       </div>

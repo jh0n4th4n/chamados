@@ -99,6 +99,13 @@
   font-weight: 600;
 }
 
+table thead th {
+  font-size: 1em;
+  background-color: #2b3458;
+  color: #f8f8f8;
+  font-weight: 600;
+}
+
 .tableContainer table tbody td {
   padding: 12px;
   border-bottom: 1px solid #ddd;

@@ -18,9 +18,18 @@ import {
 import { toast } from 'react-toastify';
 import useAuth from '../../contexts/auth';
 import Swal from 'sweetalert2';
-import styles from './customer.module.css';
+import {
+  Container,
+  FormProfile,
+  StyledLabel,
+  StyledInput,
+  StyledButton,
+  TableContainer,
+  StyledTable,
+  LoadMoreButton,
+  ActionButton,
+} from '../../styles/styled-global';
 
-// Limite de clientes por página
 const INITIAL_LIMIT = 10;
 
 export default function Customers() {
@@ -35,46 +44,41 @@ export default function Customers() {
   const [lastDoc, setLastDoc] = useState(null);
   const [hasMore, setHasMore] = useState(true);
 
-  // Cadastrar ou editar cliente
-  const handleRegister = useCallback(
-    async (e) => {
-      e.preventDefault();
-      if (nome !== '' && telefone !== '' && endereco !== '') {
-        setLoading(true);
-        try {
-          if (editId) {
-            await setDoc(doc(db, 'customers', editId), {
-              nomeFantasia: nome,
-              telefone: telefone,
-              endereco: endereco,
-            });
-            toast.success('Cliente atualizado com sucesso!');
-          } else {
-            await addDoc(collection(db, 'customers'), {
-              nomeFantasia: nome,
-              telefone: telefone,
-              endereco: endereco,
-            });
-            toast.success('Cliente registrado com sucesso!');
-          }
-          setNome('');
-          setTelefone('');
-          setEndereco('');
-          setEditId(null);
-        } catch (error) {
-          toast.error('Erro ao fazer o cadastro: ' + error.message);
-        } finally {
-          setLoading(false);
+  const handleRegister = useCallback(async (e) => {
+    e.preventDefault();
+    if (nome !== '' && telefone !== '' && endereco !== '') {
+      setLoading(true);
+      try {
+        if (editId) {
+          await setDoc(doc(db, 'customers', editId), {
+            nomeFantasia: nome,
+            telefone,
+            endereco,
+          });
+          toast.success('Cliente atualizado com sucesso!');
+        } else {
+          await addDoc(collection(db, 'customers'), {
+            nomeFantasia: nome,
+            telefone,
+            endereco,
+          });
+          toast.success('Cliente registrado com sucesso!');
         }
-      } else {
-        toast.error('Preencha todos os campos!');
+        setNome('');
+        setTelefone('');
+        setEndereco('');
+        setEditId(null);
+      } catch (error) {
+        toast.error('Erro ao fazer o cadastro: ' + error.message);
+      } finally {
+        setLoading(false);
       }
-    },
-    [nome, telefone, endereco, editId]
-  );
+    } else {
+      toast.error('Preencha todos os campos!');
+    }
+  }, [nome, telefone, endereco, editId]);
 
-  // Carrega clientes com paginação
-  const loadCustomers = useCallback(async () => {
+  const loadCustomers = async () => {
     setLoading(true);
     try {
       let q = query(
@@ -114,13 +118,45 @@ export default function Customers() {
     } finally {
       setLoading(false);
     }
-  }, [lastDoc]);
+  };
 
   useEffect(() => {
-    loadCustomers();
+    const loadInitialCustomers = async () => {
+      setLoading(true);
+      try {
+        const q = query(
+          collection(db, 'customers'),
+          orderBy('nomeFantasia'),
+          limit(INITIAL_LIMIT)
+        );
+
+        const snapshot = await getDocs(q);
+
+        if (!snapshot.empty) {
+          const initialClientes = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+
+          setClientes(initialClientes);
+          setLastDoc(snapshot.docs[snapshot.docs.length - 1]);
+
+          if (snapshot.docs.length < INITIAL_LIMIT) {
+            setHasMore(false);
+          }
+        } else {
+          setHasMore(false);
+        }
+      } catch (error) {
+        toast.error('Erro ao carregar clientes: ' + error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadInitialCustomers();
   }, []);
 
-  // Deletar cliente com confirmação
   const handleDelete = useCallback(async (id) => {
     const result = await Swal.fire({
       title: 'Você tem certeza?',
@@ -145,7 +181,6 @@ export default function Customers() {
     }
   }, []);
 
-  // Editar cliente (preencher formulário)
   const handleEdit = useCallback((cliente) => {
     setNome(cliente.nomeFantasia);
     setTelefone(cliente.telefone);
@@ -160,44 +195,42 @@ export default function Customers() {
         <Title name="Clientes">
           <FiUser size={25} />
         </Title>
-        <div className={styles.container}>
-          {/* Formulário */}
-          <form className={styles.formProfile} onSubmit={handleRegister}>
-            <label>
+        <Container>
+          <FormProfile onSubmit={handleRegister}>
+            <StyledLabel>
               Nome do Cliente
-              <input
+              <StyledInput
                 type="text"
                 placeholder="Digite o nome do cliente"
                 value={nome}
                 onChange={(e) => setNome(e.target.value)}
               />
-            </label>
-            <label>
+            </StyledLabel>
+            <StyledLabel>
               Telefone do Cliente
-              <input
+              <StyledInput
                 type="tel"
                 placeholder="(99) 9999-9999"
                 value={telefone}
                 onChange={(e) => setTelefone(e.target.value)}
               />
-            </label>
-            <label>
+            </StyledLabel>
+            <StyledLabel>
               Endereço
-              <input
+              <StyledInput
                 type="text"
                 placeholder="Ex: 1º andar"
                 value={endereco}
                 onChange={(e) => setEndereco(e.target.value)}
               />
-            </label>
-            <button className={styles.salvar} type="submit" disabled={loading}>
+            </StyledLabel>
+            <StyledButton type="submit" disabled={loading}>
               {loading ? 'Salvando...' : 'Salvar'}
-            </button>
-          </form>
+            </StyledButton>
+          </FormProfile>
 
-          {/* Tabela */}
-          <div className={styles.tableContainer}>
-            <table>
+          <TableContainer>
+            <StyledTable>
               <thead>
                 <tr>
                   <th>Nome</th>
@@ -213,39 +246,30 @@ export default function Customers() {
                     <td>{cliente.telefone}</td>
                     <td>{cliente.endereco}</td>
                     <td>
-                      <button
-                        className={styles.action}
+                      <ActionButton
                         style={{ backgroundColor: '#f6a935' }}
                         onClick={() => handleEdit(cliente)}
                       >
                         <FiEdit2 color="#FFF" size={17} />
-                      </button>
-                      <button
-                        className={styles.action}
+                      </ActionButton>
+                      <ActionButton
                         style={{ backgroundColor: '#d9534f' }}
                         onClick={() => handleDelete(cliente.id)}
                       >
                         <FiTrash2 color="#FFF" size={17} />
-                      </button>
+                      </ActionButton>
                     </td>
                   </tr>
                 ))}
               </tbody>
-            </table>
-
-            {/* Botão Carregar Mais */}
+            </StyledTable>
             {hasMore && (
-              <button
-                className={styles.btnMore}
-                onClick={loadCustomers}
-                disabled={loading}
-                style={{ marginTop: '20px' }}
-              >
+              <LoadMoreButton onClick={loadCustomers} disabled={loading}>
                 {loading ? 'Carregando...' : 'Carregar mais'}
-              </button>
+              </LoadMoreButton>
             )}
-          </div>
-        </div>
+          </TableContainer>
+        </Container>
       </div>
     </div>
   );

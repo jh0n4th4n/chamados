@@ -20,6 +20,7 @@ export default function New() {
   const [assunto, setAssunto] = useState('Suporte');
   const [status, setStatus] = useState('Aberto');
   const [idCustomer, setIdCustomer] = useState(false);
+  const [setorSelecionado, setSetorSelecionado] = useState(user?.setor || '');
 
   const assuntosTI = [
     "Atualização de Software", "Conflito entre Aplicativos", "Erro de Sistema", "Falha ao Atualizar Software",
@@ -36,6 +37,59 @@ export default function New() {
     "Problema de Telecomunicação", "Problema de Telefonia", "Problema de Impressão"
   ];
 
+  const setoresDisponiveis = [
+    "Ala A",
+    "Ala B",
+    "Almoxarifado",
+    "Ambulatorio",
+    "Arquivo",
+    "Banco de Leite",
+    "Berçario Externo",
+    "Berçario Interno",
+    "Bloco Cirurgico",
+    "CCIH",
+    "CME",
+    "Canguru",
+    "Comissão de Etica",
+    "Compras",
+    "Contas Medicas",
+    "Coordenação de Enfermagem",
+    "Copa",
+    "Corredores",
+    "Cozinha",
+    "Direção Geral",
+    "Direção Recepção",
+    "Engenharia Clinica",
+    "Epidemiologia",
+    "Farmácia",
+    "Financeiro",
+    "Jurídico",
+    "Laboratorio",
+    "Lactario",
+    "Lavanderia",
+    "Manutenção",
+    "Motoristas",
+    "NEP",
+    "Nucleo de Regulação Interna",
+    "Nutrição",
+    "Núcleo de Segurança do Paciente",
+    "Planejamento",
+    "Pré-Parto",
+    "Psicologia",
+    "Recepção Central",
+    "Recepção de Emergência",
+    "Recursos Humanos",
+    "Sala de Arquivos",
+    "Sala de Pesquisa",
+    "Sala de Vacina",
+    "Serviço Social",
+    "Soluções",
+    "TI",
+    "Teste da Orelhinha",
+    "Triagem",
+    "Ultrassonografia"
+  ];
+
   const loadChamado = useCallback(async () => {
     const docRef = doc(db, "chamados", id);
     try {
@@ -46,6 +100,7 @@ export default function New() {
         setAssunto(data.assunto);
         setStatus(data.status);
         setComplemento(data.complemento);
+        setSetorSelecionado(data.setor || user?.setor || '');
         setIdCustomer(true);
       } else {
         toast.error("Chamado não encontrado");
@@ -56,7 +111,7 @@ export default function New() {
       toast.error("Erro ao carregar chamado");
       setIdCustomer(false);
     }
-  }, [id]);
+  }, [id, user?.setor]);
 
   useEffect(() => {
     if (id) {
@@ -75,7 +130,7 @@ export default function New() {
   async function handleRegister(e) {
     e.preventDefault();
 
-    const cliente = { nomeFantasia: user.setor, id: user.setor };
+    const cliente = { nomeFantasia: setorSelecionado, id: setorSelecionado };
 
     if (!cliente || !cliente.nomeFantasia) {
       toast.error("Setor do usuário não identificado.");
@@ -107,7 +162,7 @@ export default function New() {
         await updateDoc(chamadoRef, {
           ...baseData,
           usuario: chamadoExistente.usuario || user?.nome || 'Usuário original não identificado',
-          setor: chamadoExistente.setor || user?.setor || 'Setor não informado',
+          setor: chamadoExistente.setor || setorSelecionado,
           created: chamadoExistente.created,
           finalizadoEm,
         });
@@ -117,7 +172,7 @@ export default function New() {
         await addDoc(collection(db, "chamados"), {
           ...baseData,
           usuario: user?.displayName || user?.nome || user?.email || 'Usuário não identificado',
-          setor: user?.setor || 'Setor não informado',
+          setor: setorSelecionado,
           created: new Date(),
         });
 
@@ -143,7 +198,17 @@ export default function New() {
         <div className="container">
           <form className="form-profile" onSubmit={handleRegister}>
             <label>Setor Solicitante</label>
-            <input type="text" disabled value={user?.setor || 'Setor não identificado'} />
+            {user.role === 'admin' ? (
+              <select value={setorSelecionado} onChange={(e) => setSetorSelecionado(e.target.value)} required>
+                {setoresDisponiveis.map((setor, index) => (
+                  <option key={index} value={setor}>
+                    {setor}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <input type="text" disabled value={setorSelecionado || 'Setor não identificado'} />
+            )}
 
             <label>Assunto</label>
             <select value={assunto} onChange={handleChangeSelect}>

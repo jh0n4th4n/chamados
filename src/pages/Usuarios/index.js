@@ -5,31 +5,45 @@ import { FiUser, FiEdit2, FiTrash2, FiLock } from 'react-icons/fi';
 import { db } from '../../services/firebaseConnection';
 import { collection, onSnapshot, deleteDoc, doc, setDoc } from 'firebase/firestore';
 import { toast } from 'react-toastify';
-import { getAuth, createUserWithEmailAndPassword, sendPasswordResetEmail, deleteUser } from "firebase/auth";
-import Swal from 'sweetalert2'; // Importação do SweetAlert2
-import styles from './users.module.css';
+import { getAuth, createUserWithEmailAndPassword, sendPasswordResetEmail, deleteUser } from 'firebase/auth';
+import Swal from 'sweetalert2';
+import {
+  Container,
+  FormProfile,
+  StyledLabel,
+  StyledInput,
+  StyledButton,
+  TableContainer,
+  StyledTable,
+  ActionButton,
+} from '../../styles/styled-global';
 
 export default function Users() {
   const [formData, setFormData] = useState({ nome: '', email: '', password: '', role: '', setor: '' });
   const [loading, setLoading] = useState(false);
   const [usuarios, setUsuarios] = useState([]);
   const [editId, setEditId] = useState(null);
-  const [nomesFantasia, setNomesFantasia] = useState([]); // Estado para armazenar os nomes fantasia
+  const [nomesFantasia, setNomesFantasia] = useState([]);
 
-  // Busca os nomes fantasia da tabela customers
   useEffect(() => {
-    const unsubscribe = onSnapshot(collection(db, "customers"), (snapshot) => {
-      const nomesFantasiaList = snapshot.docs.map((doc) => doc.data().nomeFantasia).filter(Boolean);
-      setNomesFantasia(nomesFantasiaList);
+    const unsubscribe = onSnapshot(collection(db, 'customers'), (snapshot) => {
+      const nomes = snapshot.docs.map((doc) => doc.data().nomeFantasia).filter(Boolean);
+      setNomesFantasia(nomes);
     });
-
     return () => unsubscribe();
   }, []);
 
-  // Atualiza os valores do formulário
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, 'users'), (snapshot) => {
+      const usersList = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      setUsuarios(usersList);
+    });
+    return () => unsubscribe();
+  }, []);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const clearForm = () => {
@@ -37,13 +51,12 @@ export default function Users() {
     setEditId(null);
   };
 
-  // Registra ou atualiza um usuário
   const handleRegister = async (e) => {
     e.preventDefault();
     const { nome, email, password, role, setor } = formData;
 
     if (!nome || !email || !role || !setor || (!editId && !password)) {
-      toast.error("Por favor, preencha todos os campos obrigatórios!");
+      toast.error('Por favor, preencha todos os campos obrigatórios!');
       return;
     }
 
@@ -52,35 +65,23 @@ export default function Users() {
       const auth = getAuth();
 
       if (editId) {
-        await setDoc(doc(db, "users", editId), { nome, email, role, setor });
-        toast.success("Usuário atualizado com sucesso!");
+        await setDoc(doc(db, 'users', editId), { nome, email, role, setor });
+        toast.success('Usuário atualizado com sucesso!');
       } else {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const uid = userCredential.user.uid;
-
-        await setDoc(doc(db, "users", uid), { nome, email, role, setor });
-        toast.success("Usuário cadastrado com sucesso!");
+        await setDoc(doc(db, 'users', uid), { nome, email, role, setor });
+        toast.success('Usuário cadastrado com sucesso!');
       }
 
       clearForm();
     } catch (error) {
-      toast.error("Erro ao salvar o usuário: " + error.message);
+      toast.error('Erro ao salvar o usuário: ' + error.message);
     } finally {
       setLoading(false);
     }
   };
 
-  // Obtém usuários em tempo real
-  useEffect(() => {
-    const unsubscribe = onSnapshot(collection(db, "users"), (snapshot) => {
-      const usersList = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-      setUsuarios(usersList);
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  // Deleta um usuário com SweetAlert2
   const handleDelete = async (id, email) => {
     const result = await Swal.fire({
       title: 'Você tem certeza?',
@@ -96,29 +97,25 @@ export default function Users() {
     if (result.isConfirmed) {
       try {
         const auth = getAuth();
-        await deleteDoc(doc(db, "users", id));
-
+        await deleteDoc(doc(db, 'users', id));
         const user = auth.currentUser;
         if (user && user.email === email) {
           await deleteUser(user);
         }
-
         toast.success('Usuário excluído com sucesso!');
       } catch (error) {
-        console.error('Erro ao deletar usuário:', error);
-        toast.error('Erro ao excluir usuário.');
+        toast.error('Erro ao excluir usuário: ' + error.message);
       }
     }
   };
 
-  // Reseta a senha do usuário
   const handleResetPassword = async (email) => {
     try {
       const auth = getAuth();
       await sendPasswordResetEmail(auth, email);
-      toast.success("E-mail de redefinição de senha enviado!");
+      toast.success('E-mail de redefinição de senha enviado!');
     } catch (error) {
-      toast.error("Erro ao enviar redefinição de senha: " + error.message);
+      toast.error('Erro ao enviar redefinição de senha: ' + error.message);
     }
   };
 
@@ -130,11 +127,11 @@ export default function Users() {
           <FiUser size={25} />
         </Title>
 
-        <div className={styles.container}>
-          <form className={styles.formProfile} onSubmit={handleRegister}>
-            <label>
+        <Container>
+          <FormProfile onSubmit={handleRegister}>
+            <StyledLabel>
               Nome do Usuário
-              <input
+              <StyledInput
                 type="text"
                 name="nome"
                 placeholder="Digite o nome do usuário"
@@ -142,10 +139,11 @@ export default function Users() {
                 onChange={handleChange}
                 required
               />
-            </label>
-            <label>
+            </StyledLabel>
+
+            <StyledLabel>
               Email do Usuário
-              <input
+              <StyledInput
                 type="email"
                 name="email"
                 placeholder="Digite o email do usuário"
@@ -153,11 +151,12 @@ export default function Users() {
                 onChange={handleChange}
                 required
               />
-            </label>
+            </StyledLabel>
+
             {!editId && (
-              <label>
+              <StyledLabel>
                 Senha do Usuário
-                <input
+                <StyledInput
                   type="password"
                   name="password"
                   placeholder="Digite uma senha"
@@ -165,17 +164,19 @@ export default function Users() {
                   onChange={handleChange}
                   required
                 />
-              </label>
+              </StyledLabel>
             )}
-            <label>
+
+            <StyledLabel>
               Role do Usuário
               <select name="role" value={formData.role} onChange={handleChange} required>
                 <option value="">Selecione o tipo de perfil</option>
                 <option value="admin">Admin</option>
                 <option value="user">User</option>
               </select>
-            </label>
-            <label>
+            </StyledLabel>
+
+            <StyledLabel>
               Setor do Usuário
               <select name="setor" value={formData.setor} onChange={handleChange} required>
                 <option value="">Selecione o setor</option>
@@ -185,14 +186,15 @@ export default function Users() {
                   </option>
                 ))}
               </select>
-            </label>
-            <button className={styles.salvar} type="submit" disabled={loading}>
-              {loading ? "Salvando..." : "Salvar"}
-            </button>
-          </form>
+            </StyledLabel>
 
-          <div className={styles.tableContainer}>
-            <table>
+            <StyledButton type="submit" disabled={loading}>
+              {loading ? 'Salvando...' : 'Salvar'}
+            </StyledButton>
+          </FormProfile>
+
+          <TableContainer>
+            <StyledTable>
               <thead>
                 <tr>
                   <th>Nome</th>
@@ -210,34 +212,34 @@ export default function Users() {
                     <td>{usuario.role}</td>
                     <td>{usuario.setor}</td>
                     <td>
-                      <button
-                        className={styles.action}
+                      <ActionButton
                         style={{ backgroundColor: '#f6a935' }}
-                        onClick={() => setFormData({ ...usuario, password: '' }, setEditId(usuario.id))}
+                        onClick={() => {
+                          setFormData({ ...usuario, password: '' });
+                          setEditId(usuario.id);
+                        }}
                       >
                         <FiEdit2 color="#FFF" size={17} />
-                      </button>
-                      <button
-                        className={styles.action}
+                      </ActionButton>
+                      <ActionButton
                         style={{ backgroundColor: '#d9534f' }}
                         onClick={() => handleDelete(usuario.id, usuario.email)}
                       >
                         <FiTrash2 color="#FFF" size={17} />
-                      </button>
-                      <button
-                        className={styles.action}
+                      </ActionButton>
+                      <ActionButton
                         style={{ backgroundColor: '#5bc0de' }}
                         onClick={() => handleResetPassword(usuario.email)}
                       >
                         <FiLock color="#FFF" size={17} />
-                      </button>
+                      </ActionButton>
                     </td>
                   </tr>
                 ))}
               </tbody>
-            </table>
-          </div>
-        </div>
+            </StyledTable>
+          </TableContainer>
+        </Container>
       </div>
     </div>
   );

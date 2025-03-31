@@ -139,9 +139,9 @@ table th, table td {
 }
 
 table thead th {
-  font-size: 1.1em;
-  background-color: #f0efef;
-  color: #333;
+  font-size: 1em;
+  background-color: #2b3458;
+  color: #f8f8f8;
   font-weight: 600;
 }
 
