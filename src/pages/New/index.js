@@ -5,22 +5,17 @@ import { FiPlusCircle } from 'react-icons/fi';
 import { AuthContext } from '../../contexts/auth';
 import { db } from '../../services/firebaseConnection';
 import {
-  collection, getDocs, getDoc, doc, addDoc, updateDoc
+  doc, getDoc, addDoc, updateDoc, collection
 } from 'firebase/firestore';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import './new.css';
-
-const listRef = collection(db, "customers");
 
 export default function New() {
   const { user } = useContext(AuthContext);
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const [customers, setCustomers] = useState([]);
-  const [loadCustomer, setLoadCustomer] = useState(true);
-  const [customerSelected, setCustomerSelected] = useState(null);
   const [complemento, setComplemento] = useState('');
   const [assunto, setAssunto] = useState('Suporte');
   const [status, setStatus] = useState('Aberto');
@@ -41,18 +36,16 @@ export default function New() {
     "Problema de Telecomunicação", "Problema de Telefonia", "Problema de Impressão"
   ];
 
-  const loadId = useCallback(async (lista) => {
+  const loadChamado = useCallback(async () => {
     const docRef = doc(db, "chamados", id);
     try {
       const snapshot = await getDoc(docRef);
 
       if (snapshot.exists()) {
-        setAssunto(snapshot.data().assunto);
-        setStatus(snapshot.data().status);
-        setComplemento(snapshot.data().complemento);
-
-        const index = lista.findIndex((item) => item.id === snapshot.data().clienteId);
-        setCustomerSelected(index !== -1 ? index : null);
+        const data = snapshot.data();
+        setAssunto(data.assunto);
+        setStatus(data.status);
+        setComplemento(data.complemento);
         setIdCustomer(true);
       } else {
         toast.error("Chamado não encontrado");
@@ -66,29 +59,10 @@ export default function New() {
   }, [id]);
 
   useEffect(() => {
-    async function loadCustomers() {
-      try {
-        const snapshot = await getDocs(listRef);
-        const lista = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          nomeFantasia: doc.data().nomeFantasia,
-        }));
-
-        setCustomers(lista);
-        setLoadCustomer(false);
-
-        if (id) {
-          loadId(lista);
-        }
-      } catch (error) {
-        console.error("Erro ao buscar os clientes", error);
-        toast.error("Erro ao buscar os clientes");
-        setLoadCustomer(false);
-      }
+    if (id) {
+      loadChamado();
     }
-
-    loadCustomers();
-  }, [id, loadId]);
+  }, [id, loadChamado]);
 
   function handleOptionChange(e) {
     setStatus(e.target.value);
@@ -98,20 +72,13 @@ export default function New() {
     setAssunto(e.target.value);
   }
 
-  function handleChangeCustomer(e) {
-    const selectedIndex = e.target.value;
-    if (customers[selectedIndex]) {
-      setCustomerSelected(selectedIndex);
-    }
-  }
-
   async function handleRegister(e) {
     e.preventDefault();
 
-    const cliente = customers[customerSelected] || { nomeFantasia: user.setor, id: 'cliente_default' };
+    const cliente = { nomeFantasia: user.setor, id: user.setor };
 
     if (!cliente || !cliente.nomeFantasia) {
-      toast.error("Selecione um cliente válido.");
+      toast.error("Setor do usuário não identificado.");
       return;
     }
 
@@ -158,7 +125,6 @@ export default function New() {
       }
 
       setComplemento('');
-      setCustomerSelected(null);
       navigate('/dashboard');
     } catch (error) {
       console.error(error);
@@ -177,18 +143,7 @@ export default function New() {
         <div className="container">
           <form className="form-profile" onSubmit={handleRegister}>
             <label>Setor Solicitante</label>
-            {loadCustomer ? (
-              <input type="text" disabled value="Carregando..." />
-            ) : (
-              <select value={customerSelected ?? ''} onChange={handleChangeCustomer}>
-                <option value="" disabled>Selecione um cliente</option>
-                {customers.map((item, index) => (
-                  <option key={index} value={index}>
-                    {item.nomeFantasia}
-                  </option>
-                ))}
-              </select>
-            )}
+            <input type="text" disabled value={user?.setor || 'Setor não identificado'} />
 
             <label>Assunto</label>
             <select value={assunto} onChange={handleChangeSelect}>
