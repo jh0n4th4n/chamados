@@ -43,14 +43,21 @@ export default function Chamados() {
     const unsubscribe = onSnapshot(
       query(collection(db, 'chamados'), orderBy('created', 'desc')),
       (snapshot) => {
-        let lista = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-          created: doc.data().created?.toDate?.() || new Date(),
-          createdFormat: format(doc.data().created?.toDate?.() || new Date(), 'dd/MM/yyyy HH:mm:ss'),
-        }));
+        let lista = snapshot.docs.map((doc) => {
+          const data = doc.data();
+          const created = data.created?.toDate?.() || new Date();
+          const finalizado = data.finalizadoEm?.toDate?.() || null;
 
-        // ✅ Filtro por setor para usuários comuns (feito no useEffect!)
+          return {
+            id: doc.id,
+            ...data,
+            created,
+            finalizado,
+            createdFormat: format(created, 'dd/MM/yyyy HH:mm:ss'),
+            finalizadoFormat: finalizado ? format(finalizado, 'dd/MM/yyyy HH:mm:ss') : '—',
+          };
+        });
+
         if (user.role !== 'admin') {
           lista = lista.filter((item) => item.setor === user.setor);
         }
@@ -237,6 +244,7 @@ export default function Chamados() {
                   <th>Usuário</th>
                   <th>Setor</th>
                   <th>Cadastrado em</th>
+                  <th>Encerrado em</th> {/* NOVA COLUNA */}
                   <th>Ações</th>
                 </tr>
               </thead>
@@ -249,6 +257,7 @@ export default function Chamados() {
                     <td>{item.usuario || '—'}</td>
                     <td>{item.setor || '—'}</td>
                     <td>{item.createdFormat}</td>
+                    <td>{item.finalizadoFormat}</td> {/* NOVA COLUNA */}
                     <td>
                       <button
                         className="action"
