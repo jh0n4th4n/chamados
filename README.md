@@ -9,29 +9,7 @@
 
 > Solução completa para gestão de chamados técnicos com dashboard analítico, exportação de relatórios e controle de acesso granular. Desenvolvido com stack moderna para máxima eficiência operacional.
 
-## 📷 Visualização do Painel
-
-### Menu Principal
-- **Chamados**
-- **Clientes**
-- **Usuários**
-- **Gráficos**
-- **Contratos**
-- **Perfil**
-
-### Listagem de Chamados (Exemplo)
-
-| SETOR               | ASSUNTO                 | STATUS    | USUÁRIO                  | CADASTRO              | ENCERRAMENTO        | AÇÕES       |
-|---------------------|-------------------------|-----------|--------------------------|-----------------------|---------------------|-------------|
-| Direção Geral       | Problema de Impressora  | 27/09/06  | Jovanithan Kazas         | 01/04/2055 16:46     | 01/04/2055 16:47   | ✏️ 👁️ 🗑️ 📋 |
-| Recursos Humanos    | Atualização de Software | 27/09/06  | Jovanithan Kazas         | 31/03/2055 13:56     | 31/03/2055 13:56   | ✏️ 👁️ 🗑️ 📋 |
-| T1                 | Superior Técnico        | 27/09/06  | Weinery Alves Queiroz    | 31/03/2055 10:18     | 31/03/2055 10:25   | ✏️ 👁️ 🗑️ 📋 |
-| Financeiro         | Superior Técnico        | 27/09/06  | Weinery Alves Queiroz    | 31/03/2055 09:24     | 31/03/2055 09:25   | ✏️ 👁️ 🗑️ 📋 |
-| Manutenção         | Superior Técnico        | 27/09/06  | —                        | 27/03/2055 10:34     | —                  | ✏️ 👁️ 🗑️ 📋 |
-
-*Legenda de Ações: ✏️ Editar | 👁️ Visualizar | 🗑️ Excluir | 📋 Copiar*
-
----
+![Dashboard Preview](https://example.com/path-to-your-preview-image.png)
 
 ## ✨ Funcionalidades Avançadas
 
@@ -40,53 +18,76 @@
 - **Fluxo de status visual** (Aberto → Em Análise → Em Andamento → Resolvido)
 - **Histórico detalhado** com timestamp e responsável por cada alteração
 - **Anexos de arquivos** (PDFs, imagens, documentos)
+- **Pesquisa avançada** com filtros combinados
 
 ### 📊 Business Intelligence
 - **Dashboard analítico** com métricas em tempo real
 - **Gráficos interativos** (Recharts) de SLA, tempo médio de resolução
 - **Indicadores KPI** de eficiência por equipe/técnico
+- **Previsão de demanda** com base em histórico
 
 ### 📑 Exportação de Dados
 - **Gerador de PDF profissional** (jsPDF + AutoTable)
 - **Exportação para Excel** (XLSX) com formatação automática
 - **Relatórios personalizáveis** com logo da empresa
+- **Agendamento de relatórios** periódicos
 
 ### 🔐 Segurança e Acessos
 - **Autenticação via Firebase** (Email/Senha, Google)
 - **Controle de permissões** por nível de usuário
 - **Regras de segurança** no Firestore
+- **Auditoria de acesso** completo
 
 ### 🎨 UX Moderna
 - **Interface responsiva** (mobile/desktop)
 - **Notificações Toast** para ações importantes
+- **Modo claro/escuro** (em desenvolvimento)
 - **Componentes reutilizáveis** com Styled Components
-
----
+- **Acessibilidade** WCAG 2.1 AA
 
 ## 🚀 Stack Tecnológica
 
-| Módulo | Tecnologias | Finalidade |
-|--------|------------|------------|
-| **Frontend** | React 18, Styled Components | Interface do usuário |
-| **Backend** | Firebase (Firestore, Auth) | Banco de dados e autenticação |
-| **PDF** | jsPDF, AutoTable | Geração de relatórios |
-| **Gráficos** | Recharts | Visualização de dados |
-| **Utilitários** | date-fns, React Icons | Manipulação de datas e ícones |
-
----
+| Módulo | Tecnologias | Versão | Finalidade |
+|--------|------------|--------|------------|
+| **Core** | React, React DOM | 18.3.1 | Framework base |
+| **Estilo** | Styled Components | 6.1.15 | CSS-in-JS |
+| **Backend** | Firebase (Firestore, Auth) | 10.14.1 | Banco de dados e autenticação |
+| **Forms** | React Hook Form, Input Mask | 2.0.4 | Validação de formulários |
+| **PDF** | jsPDF, AutoTable | 2.5.2 | Geração de relatórios |
+| **Excel** | XLSX | 0.18.5 | Exportação para planilhas |
+| **Gráficos** | Recharts | 2.13.0 | Visualização de dados |
+| **UI** | React Icons, SweetAlert2 | 5.3.0, 11.15.3 | Componentes visuais |
+| **Datas** | date-fns | 3.6.0 | Manipulação de datas |
+| **Roteamento** | React Router DOM | 6.24.1 | Navegação SPA |
+| **Editor** | React Quill | 2.0.0 | Editor de rich text |
+| **Notificações** | React Toastify | 10.0.6 | Feedback visual |
 
 ## 🛠️ Configuração do Ambiente
 
+### Pré-requisitos
+- Node.js 18+
+- Yarn 1.22+ (ou npm 8+)
+- Conta Firebase
+
 ```bash
-# Clone o repositório
+# 1. Clone o repositório
 git clone https://github.com/seu-usuario/sistema-de-chamados.git
 
-# Instale as dependências
-npm install
+# 2. Instale as dependências (recomendado usar Yarn)
+yarn install
 
-# Configure o Firebase
-cp .env.example .env
-# Preencha com suas credenciais
+# 3. Configure o Firebase
+cp .env.example .env.local
+# Preencha com suas credenciais do Firebase:
+VITE_FIREBASE_API_KEY=SUA_CHAVE
+VITE_FIREBASE_AUTH_DOMAIN=SEU_DOMINIO
+VITE_FIREBASE_PROJECT_ID=SEU_PROJETO
+VITE_FIREBASE_STORAGE_BUCKET=SEU_BUCKET
+VITE_FIREBASE_MESSAGING_SENDER_ID=SEU_SENDER
+VITE_FIREBASE_APP_ID=SEU_APP_ID
 
-# Inicie o servidor
-npm run dev
+# 4. Inicie o servidor de desenvolvimento
+yarn dev
+
+# 5. Acesse no navegador
+http://localhost:3000
