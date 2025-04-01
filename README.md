@@ -61,33 +61,3 @@
 | **Roteamento** | React Router DOM | 6.24.1 | Navegação SPA |
 | **Editor** | React Quill | 2.0.0 | Editor de rich text |
 | **Notificações** | React Toastify | 10.0.6 | Feedback visual |
-
-## 🛠️ Configuração do Ambiente
-
-### Pré-requisitos
-- Node.js 18+
-- Yarn 1.22+ (ou npm 8+)
-- Conta Firebase
-
-```bash
-# 1. Clone o repositório
-git clone https://github.com/seu-usuario/sistema-de-chamados.git
-
-# 2. Instale as dependências (recomendado usar Yarn)
-yarn install
-
-# 3. Configure o Firebase
-cp .env.example .env.local
-# Preencha com suas credenciais do Firebase:
-VITE_FIREBASE_API_KEY=SUA_CHAVE
-VITE_FIREBASE_AUTH_DOMAIN=SEU_DOMINIO
-VITE_FIREBASE_PROJECT_ID=SEU_PROJETO
-VITE_FIREBASE_STORAGE_BUCKET=SEU_BUCKET
-VITE_FIREBASE_MESSAGING_SENDER_ID=SEU_SENDER
-VITE_FIREBASE_APP_ID=SEU_APP_ID
-
-# 4. Inicie o servidor de desenvolvimento
-yarn dev
-
-# 5. Acesse no navegador
-http://localhost:3000
