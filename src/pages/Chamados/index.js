@@ -33,14 +33,14 @@ import { NewButton } from '../../styles/Buttons';
 const INITIAL_LIMIT = 10;
 
 const STATUS_STYLES = {
-  Aberto: { backgroundColor: '#5cb85c', color: '#fff' },
-  Progresso: { backgroundColor: '#f0ad4e', color: '#fff' },
-  Atendido: { backgroundColor: '#999999', color: '#fff' },
-  Pendente: { backgroundColor: '#ff9800', color: '#fff' },
-  Cancelado: { backgroundColor: '#d9534f', color: '#fff' },
-  Concluído: { backgroundColor: '#0275d8', color: '#fff' },
-  Teste: { backgroundColor: '#000000', color: '#fff' }, // caso queira testar
+  Aberto: { backgroundColor: '#28a745', color: '#ffffff' }, // verde Bootstrap success
+  Progresso: { backgroundColor: '#ffc107', color: '#212529' }, // amarelo Bootstrap warning
+  Atendido: { backgroundColor: '#6c757d', color: '#ffffff' }, // cinza Bootstrap secondary
+  Pendente: { backgroundColor: '#fd7e14', color: '#ffffff' }, // laranja escuro Bootstrap orange
+  Cancelado: { backgroundColor: '#dc3545', color: '#ffffff' }, // vermelho Bootstrap danger
+  Concluído: { backgroundColor: '#007bff', color: '#ffffff' }, // azul Bootstrap primary
 };
+
 
 
 export default function Chamados() {
