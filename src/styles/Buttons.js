@@ -89,6 +89,7 @@ export const ClearFiltersButton = styled.button`
 
 // Botão "Carregar mais"
 export const BtnMore = styled.button`
+  width: 150px;
   margin: 1.5em 0;
   padding: 0.8em 1.5em;
   background-color: #181c2e;
