@@ -27,7 +27,7 @@ export const NewButton = styled(Link)`
     box-shadow: 0 5px 12px rgba(0, 0, 0, 0.15);
   }
 
-  @media screen and (max-width: 600px) {
+  @media screen and (max-width: 768px) {
     width: 100%;
     float: none;
     justify-content: center;
@@ -36,7 +36,7 @@ export const NewButton = styled(Link)`
 
 // Botões de ação (editar, visualizar, excluir)
 export const ActionButton = styled.button`
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
   background-color: #0125f3;
@@ -49,6 +49,7 @@ export const ActionButton = styled.button`
   margin-right: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
+  width: 100%;
 
   &:hover {
     background-color: #001875;
@@ -56,7 +57,7 @@ export const ActionButton = styled.button`
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
   }
 
-  @media screen and (max-width: 600px) {
+  @media screen and (max-width: 768px) {
     width: 100%;
     margin-bottom: 6px;
   }
@@ -79,7 +80,7 @@ export const ClearFiltersButton = styled.button`
     background-color: #211c84;
   }
 
-  @media screen and (max-width: 600px) {
+  @media screen and (max-width: 768px) {
     width: 100%;
     margin: 10px 0 0;
     background-color: #6c6aa7;

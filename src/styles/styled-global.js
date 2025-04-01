@@ -31,10 +31,11 @@ export const FormProfile = styled.form`
   gap: 20px;
 
   @media screen and (max-width: 768px) {
+    width: 100%;
     flex-direction: column;
     align-items: stretch;
     padding: 15px;
-    gap: 15px;
+    gap: 1px;
   }
 `;
 
@@ -92,7 +93,7 @@ export const StyledButton = styled.button`
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #0125f3;
+  background-color: #001875;
   color: #fff;
   padding: 10px 20px;
   border: none;
@@ -104,7 +105,7 @@ export const StyledButton = styled.button`
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 
   &:hover {
-    background-color: #001875;
+    background-color:rgb(2, 14, 61);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   }
 
@@ -115,6 +116,8 @@ export const StyledButton = styled.button`
 `;
 
 export const TableContainer = styled.div`
+  display: flex;
+  flex-direction: column;
   width: 100%;
   overflow-x: auto;
   margin-top: 20px;
@@ -147,8 +150,10 @@ export const StyledTable = styled.table`
   }
 
   tbody tr {
-    background-color: #ffffff;
+    background-color:rgb(255, 255, 255);
     transition: background-color 0.3s ease;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
   }
 
   th, td {
@@ -190,7 +195,7 @@ export const StyledTable = styled.table`
     font-size: 0.9em;
   }
 
-  @media screen and (max-width: 600px) {
+  @media screen and (max-width: 768px) {
     border: 0;
     thead {
       display: none;
@@ -264,6 +269,18 @@ export const ActionButton = styled.button`
     transform: scale(1.05);
     background-color: #001875;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  @media screen and (max-width: 768px) {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 8px;
+    width: 100px;
+
+    &:hover {
+      transform: scale(1);
+    }
   }
 `;
 
