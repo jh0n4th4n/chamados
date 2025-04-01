@@ -61,3 +61,10 @@
 | **Roteamento** | React Router DOM | 6.24.1 | Navegação SPA |
 | **Editor** | React Quill | 2.0.0 | Editor de rich text |
 | **Notificações** | React Toastify | 10.0.6 | Feedback visual |
+
+---
+
+## 📬 Contato
+
+**Desenvolvedor Responsável:**  
+Jhonathan lucas | jhonathanlucas10x@gmail.com | +55 81 98255-5501
