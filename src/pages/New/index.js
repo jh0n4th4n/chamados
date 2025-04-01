@@ -5,7 +5,7 @@ import { FiPlusCircle } from 'react-icons/fi';
 import { AuthContext } from '../../contexts/auth';
 import { db } from '../../services/firebaseConnection';
 import {
-  doc, getDoc, addDoc, updateDoc, collection
+  doc, getDoc, addDoc, updateDoc, collection, arrayUnion
 } from 'firebase/firestore';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -37,64 +37,20 @@ export default function New() {
     "Problema de Telecomunicação", "Problema de Telefonia", "Problema de Impressão"
   ];
 
-  const setoresDisponiveis = [
-    "Ala A",
-    "Ala B",
-    "Almoxarifado",
-    "Ambulatorio",
-    "Arquivo",
-    "Banco de Leite",
-    "Berçario Externo",
-    "Berçario Interno",
-    "Bloco Cirurgico",
-    "CCIH",
-    "CME",
-    "Canguru",
-    "Comissão de Etica",
-    "Compras",
-    "Contas Medicas",
-    "Coordenação de Enfermagem",
-    "Copa",
-    "Corredores",
-    "Cozinha",
-    "Direção Geral",
-    "Direção Recepção",
-    "Engenharia Clinica",
-    "Epidemiologia",
-    "Farmácia",
-    "Financeiro",
-    "Jurídico",
-    "Laboratorio",
-    "Lactario",
-    "Lavanderia",
-    "Manutenção",
-    "Motoristas",
-    "NEP",
-    "Nucleo de Regulação Interna",
-    "Nutrição",
-    "Núcleo de Segurança do Paciente",
-    "Planejamento",
-    "Pré-Parto",
-    "Psicologia",
-    "Recepção Central",
-    "Recepção de Emergência",
-    "Recursos Humanos",
-    "Sala de Arquivos",
-    "Sala de Pesquisa",
-    "Sala de Vacina",
-    "Serviço Social",
-    "Soluções",
-    "TI",
-    "Teste da Orelhinha",
-    "Triagem",
-    "Ultrassonografia"
-  ];
+  const setoresDisponiveis = ["Ala A", "Ala B", "Almoxarifado", "Ambulatorio", "Arquivo", "Banco de Leite", "Berçario Externo",
+    "Berçario Interno", "Bloco Cirurgico", "CCIH", "CME", "Canguru", "Comissão de Etica", "Compras",
+    "Contas Medicas", "Coordenação de Enfermagem", "Copa", "Corredores", "Cozinha", "Direção Geral",
+    "Direção Recepção", "Engenharia Clinica", "Epidemiologia", "Farmácia", "Financeiro", "Jurídico",
+    "Laboratorio", "Lactario", "Lavanderia", "Manutenção", "Motoristas", "NEP", "Nucleo de Regulação Interna",
+    "Nutrição", "Núcleo de Segurança do Paciente", "Planejamento", "Pré-Parto", "Psicologia",
+    "Recepção Central", "Recepção de Emergência", "Recursos Humanos", "Sala de Arquivos", "Sala de Pesquisa",
+    "Sala de Vacina", "Serviço Social", "Soluções", "TI", "Teste da Orelhinha", "Triagem", "Ultrassonografia"];
 
   const loadChamado = useCallback(async () => {
+    if (!id) return;
     const docRef = doc(db, "chamados", id);
     try {
       const snapshot = await getDoc(docRef);
-
       if (snapshot.exists()) {
         const data = snapshot.data();
         setAssunto(data.assunto);
@@ -114,25 +70,14 @@ export default function New() {
   }, [id, user?.setor]);
 
   useEffect(() => {
-    if (id) {
-      loadChamado();
-    }
-  }, [id, loadChamado]);
-
-  function handleOptionChange(e) {
-    setStatus(e.target.value);
-  }
-
-  function handleChangeSelect(e) {
-    setAssunto(e.target.value);
-  }
+    loadChamado();
+  }, [loadChamado]);
 
   async function handleRegister(e) {
     e.preventDefault();
-
     const cliente = { nomeFantasia: setorSelecionado, id: setorSelecionado };
 
-    if (!cliente || !cliente.nomeFantasia) {
+    if (!cliente.nomeFantasia) {
       toast.error("Setor do usuário não identificado.");
       return;
     }
@@ -159,14 +104,26 @@ export default function New() {
         const chamadoExistente = chamadoSnap.data();
         const finalizadoEm = status === 'Atendido' ? new Date() : chamadoExistente.finalizadoEm || null;
 
-        await updateDoc(chamadoRef, {
+        const historicoStatus = chamadoExistente.historicoStatus || [];
+        const ultimoStatus = historicoStatus[historicoStatus.length - 1]?.status;
+
+        const updateData = {
           ...baseData,
           usuario: chamadoExistente.usuario || user?.nome || 'Usuário original não identificado',
           setor: chamadoExistente.setor || setorSelecionado,
           created: chamadoExistente.created,
           finalizadoEm,
-        });
+        };
 
+        if (status !== ultimoStatus) {
+          updateData.historicoStatus = arrayUnion({
+            status,
+            data: new Date(),
+            usuario: user?.nome || user?.displayName || user?.email || 'Usuário desconhecido'
+          });
+        }
+
+        await updateDoc(chamadoRef, updateData);
         toast.success("Chamado atualizado com sucesso!");
       } else {
         await addDoc(collection(db, "chamados"), {
@@ -174,8 +131,14 @@ export default function New() {
           usuario: user?.displayName || user?.nome || user?.email || 'Usuário não identificado',
           setor: setorSelecionado,
           created: new Date(),
+          historicoStatus: [
+            {
+              status,
+              data: new Date(),
+              usuario: user?.nome || user?.displayName || user?.email || 'Usuário desconhecido'
+            }
+          ]
         });
-
         toast.success("Chamado registrado com sucesso!");
       }
 
@@ -201,9 +164,7 @@ export default function New() {
             {user.role === 'admin' ? (
               <select value={setorSelecionado} onChange={(e) => setSetorSelecionado(e.target.value)} required>
                 {setoresDisponiveis.map((setor, index) => (
-                  <option key={index} value={setor}>
-                    {setor}
-                  </option>
+                  <option key={index} value={setor}>{setor}</option>
                 ))}
               </select>
             ) : (
@@ -211,45 +172,22 @@ export default function New() {
             )}
 
             <label>Assunto</label>
-            <select value={assunto} onChange={handleChangeSelect}>
+            <select value={assunto} onChange={(e) => setAssunto(e.target.value)}>
               {assuntosTI.map((item, index) => (
-                <option key={index} value={item}>
-                  {item}
-                </option>
+                <option key={index} value={item}>{item}</option>
               ))}
             </select>
 
             {user.role === 'admin' && (
               <>
                 <label>Status</label>
-                <div className="status">
-                  <input
-                    type="radio"
-                    name="radio"
-                    value="Aberto"
-                    onChange={handleOptionChange}
-                    checked={status === 'Aberto'}
-                  />
-                  <span>Em aberto</span>
-
-                  <input
-                    type="radio"
-                    name="radio"
-                    value="Progresso"
-                    onChange={handleOptionChange}
-                    checked={status === 'Progresso'}
-                  />
-                  <span>Progresso</span>
-
-                  <input
-                    type="radio"
-                    name="radio"
-                    value="Atendido"
-                    onChange={handleOptionChange}
-                    checked={status === 'Atendido'}
-                  />
-                  <span>Atendido</span>
-                </div>
+                <select value={status} onChange={(e) => setStatus(e.target.value)}>
+                  <option value="Aberto">Aberto</option>
+                  <option value="Progresso">Em Progresso</option>
+                  <option value="Atendido">Atendido</option>
+                  <option value="Pendente">Pendente</option>
+                  <option value="Cancelado">Cancelado</option>
+                </select>
               </>
             )}
 

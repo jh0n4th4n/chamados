@@ -11,7 +11,6 @@
   backdrop-filter: blur(2px);
 }
 
-/* Container principal */
 .modal .container {
   position: relative;
   width: 100%;
@@ -27,7 +26,6 @@
   transition: all 0.3s ease-in-out;
 }
 
-/* Área dos botões no topo */
 .modal-buttons {
   position: absolute;
   top: 1rem;
@@ -39,18 +37,15 @@
   z-index: 10;
 }
 
-/* Grupo à esquerda: voltar + imprimir */
 .modal-buttons-left {
   display: flex;
   gap: 1rem;
 }
 
-/* Grupo à direita: fechar */
 .modal-buttons-right {
   display: flex;
 }
 
-/* Botões */
 .back,
 .print,
 .close {
@@ -93,7 +88,6 @@
   transform: translateY(-1px);
 }
 
-/* Títulos */
 .modal h2 {
   font-size: clamp(1.6rem, 2.5vw, 2rem);
   font-weight: 700;
@@ -101,10 +95,9 @@
   border-left: 5px solid #4caf50;
   padding-left: 1rem;
   margin-bottom: 0.5rem;
-  margin-top: 3.5rem; /* espaço abaixo dos botões */
+  margin-top: 3.5rem;
 }
 
-/* Seções e conteúdo */
 .modal-section {
   display: flex;
   flex-direction: column;
@@ -155,6 +148,34 @@
   color: #333;
 }
 
+.status-history {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.status-history li {
+  font-size: 0.95rem;
+  background-color: #f9f9f9;
+  border-left: 4px solid #007bff;
+  margin-bottom: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  color: #333;
+}
+
+.status-history li strong {
+  color: #007bff;
+}
+
+.status-history li small {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.85rem;
+  color: #666;
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -166,7 +187,6 @@
   }
 }
 
-/* Responsividade */
 @media (max-width: 600px) {
   .modal .container {
     padding: 2rem 1rem;
