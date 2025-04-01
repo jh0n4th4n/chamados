@@ -9,7 +9,7 @@
 
 > Solução completa para gestão de chamados técnicos com dashboard analítico, exportação de relatórios e controle de acesso granular. Desenvolvido com stack moderna para máxima eficiência operacional.
 
-![Dashboard Preview](.src/assets/painel.png)
+![Dashboard Preview](./src/assets/painel.png)
 
 ## ✨ Funcionalidades Avançadas
 
