@@ -6,116 +6,124 @@
     gap: 20px;
     padding: 20px;
     box-sizing: border-box;
-}
-
-.container {
+  }
+  
+  .container {
+    width: 100%;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
     gap: 20px;
-    width: 100%;
-
-}
-
-/* Container dos gráficos */
-.chart-container {
+    align-items: stretch;
+  }
+  
+  /* Calendário e botões */
+  .divCalendar {
     display: flex;
-    flex-direction: column;
-    width: 100%;
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    margin-bottom: 20px;
-}
-
-.chart-container h3 {
-    font-size: 20px;
-    font-weight: 600;
-    color: #333;
-    margin-bottom: 20px;
-}
-
-/* Calendário e botões */
-.divCalendar {
-    width: 100%;
-    display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: 10px;
-    margin-top: 15px;
-}
-
-.calendar {
-    width: 150px;
-    font-size: 1.1em;
+    gap: 15px;
+    padding: 15px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  }
+  
+  .calendar {
+    width: 180px;
+    font-size: 1em;
     padding: 8px;
-    font-weight: 600;
+    font-weight: 500;
     text-align: center;
     border: 1px solid #ccc;
-    border-radius: 5px;
-    outline: none;
+    border-radius: 6px;
     background-color: #fff;
-    transition: border-color 0.3s ease;
-}
-
-.calendar:focus {
+    transition: border-color 0.3s;
+  }
+  
+  .calendar:focus {
     border-color: #8884d8;
-}
-
-button {
+  }
+  
+  button {
     padding: 10px 20px;
     font-size: 1em;
     font-weight: 600;
     color: #fff;
     background-color: #8884d8;
     border: none;
-    border-radius: 5px;
+    border-radius: 6px;
     cursor: pointer;
     transition: background-color 0.3s ease;
-}
-
-button:hover {
+  }
+  
+  button:hover {
     background-color: #6c6aa7;
-}
-
-/* Lista de setores */
-.sector-list {
+  }
+  
+  /* Container dos gráficos */
+  .graphs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+    gap: 20px;
+  }
+  
+  .chart-container {
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .chart-container h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #444;
+    margin-bottom: 16px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+  }
+  
+  /* Lista de setores */
+  .sector-list {
     width: 100%;
-    margin-top: 20px;
-}
-
-.sector-list table {
+    margin-top: 10px;
+    overflow-x: auto;
+  }
+  
+  .sector-list table {
     width: 100%;
     border-collapse: collapse;
     background-color: #fff;
     border-radius: 10px;
     overflow: hidden;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.sector-list th,
-.sector-list td {
-    padding: 12px;
-    text-align: center;
-}
-
-.sector-list th {
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.06);
+  }
+  
+  .sector-list th,
+  .sector-list td {
+    padding: 12px 10px;
+    text-align: left;
+    font-size: 0.95rem;
+  }
+  
+  .sector-list th {
     background-color: #8884d8;
     color: #fff;
-    font-weight: bold;
-}
-
-.sector-list tr:nth-child(even) {
+    text-transform: uppercase;
+  }
+  
+  .sector-list tr:nth-child(even) {
     background-color: #f9f9f9;
-}
-
-.sector-list tr:hover {
+  }
+  
+  .sector-list tr:hover {
     background-color: #f1f1f1;
-}
-
-/* Loading */
-.loading {
+  }
+  
+  /* Loading */
+  .loading {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -123,51 +131,50 @@ button:hover {
     font-weight: bold;
     color: #8884d8;
     margin-top: 20px;
-}
-
-/* Responsividade */
-@media screen and (max-width: 768px) {
-    .dashboard {
-        padding: 10px;
-    }
-
+  }
+  
+  /* Responsividade */
+  @media (max-width: 768px) {
     .divCalendar {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 10px;
+      flex-direction: column;
+      align-items: stretch;
     }
-
+  
     .calendar {
-        width: 100%;
+      width: 100%;
     }
-
+  
     button {
-        width: 100%;
+      width: 100%;
     }
-
+  
+    .graphs-grid {
+      grid-template-columns: 1fr;
+    }
+  
     .chart-container {
-        padding: 15px;
+      padding: 15px;
     }
-
+  
     .chart-container h3 {
-        font-size: 18px;
+      font-size: 16px;
     }
-
+  
     .sector-list th,
     .sector-list td {
-        padding: 10px;
-        font-size: 0.9em;
+      font-size: 0.85rem;
     }
-}
-
-@media screen and (max-width: 480px) {
+  }
+  
+  @media (max-width: 480px) {
     .chart-container h3 {
-        font-size: 16px;
+      font-size: 15px;
     }
-
+  
     .sector-list th,
     .sector-list td {
-        padding: 8px;
-        font-size: 0.8em;
+      padding: 8px;
+      font-size: 0.8rem;
     }
-}
+  }
+  

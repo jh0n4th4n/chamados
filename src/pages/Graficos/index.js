@@ -20,9 +20,12 @@ const Graphs = () => {
     const [loading, setLoading] = useState(false);
 
     const colors = {
-        Atendido: "#57B4BA",
-        Progresso: "#ffc658",
-        Aberto: "#8884d8",
+        Atendido: "#6c757d",
+        Progresso: "#ffc107",
+        Aberto: "#28a745",
+        Pendente: "#fd7e14",
+        Cancelado: "#dc3545",
+        Concluído: "#007bff",
     };
 
     const fetchData = async (start, end) => {
