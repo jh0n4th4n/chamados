@@ -1,58 +1,83 @@
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import avatarImg from '../../assets/avatar.png';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { AuthContext } from '../../contexts/auth';
-import { FiHome, FiUser, FiSettings, FiSlack, FiUsers, FiBook } from 'react-icons/fi';
+import {
+  FiHome,
+  FiUser,
+  FiSettings,
+  FiSlack,
+  FiUsers,
+  FiBook,
+  FiChevronDown,
+  FiChevronUp
+} from 'react-icons/fi';
 import './header.css';
 
 export default function Header() {
   const { user } = useContext(AuthContext);
+  const location = useLocation();
+  const [expandContratos, setExpandContratos] = useState(location.pathname.startsWith('/contratos'));
+
+  const toggleContratos = () => setExpandContratos(prev => !prev);
 
   return (
     <div className="sidebar">
-      <div>
+      <div className="avatar-area">
         <img
           src={user.avatarUrl || avatarImg}
           alt="Foto do usuário"
+          className="avatar-img"
         />
       </div>
-      {/* Links exclusivos para todos usuarios */}
+
       <Link to="/dashboard">
-        <FiHome color="#FFF" size={24} />
+        <FiHome size={24} />
         Chamados
       </Link>
 
-      {/* Links exclusivos para o usuário admin */}
       {user?.role === 'admin' && (
         <>
           <Link to="/customers">
-            <FiUser color="#FFF" size={24} />
+            <FiUser size={24} />
             Clientes
           </Link>
+
           <Link to="/users">
-            <FiUsers color="#FFF" size={24} />
+            <FiUsers size={24} />
             Usuários
           </Link>
+
           <Link to="/graphs">
-            <FiSlack color="#FFF" size={24} />
+            <FiSlack size={24} />
             Gráficos
           </Link>
-          <Link to="/contratos">
-            <FiBook color="#FFF" size={24} />
-            Contratos
-          </Link>
+
+          <div className="menu-collapsible">
+            <div className="menu-item" onClick={toggleContratos}>
+              <FiBook size={24} />
+              <span>Contratos</span>
+              {expandContratos ? (
+                <FiChevronUp size={18} style={{ marginLeft: 'auto' }} />
+              ) : (
+                <FiChevronDown size={18} style={{ marginLeft: 'auto' }} />
+              )}
+            </div>
+
+            {expandContratos && (
+              <div className="submenu">
+                <Link to="/contratos">📄 Ver Contratos</Link>
+                <Link to="/contratos/novo">➕ Novo Contrato</Link>
+              </div>
+            )}
+          </div>
         </>
       )}
 
-      {/* Links exclusivos para todos usuarios */}
-
       <Link to="/profile">
-        <FiSettings color="#FFF" size={24} />
+        <FiSettings size={24} />
         Perfil
       </Link>
-
-
-
     </div>
   );
 }

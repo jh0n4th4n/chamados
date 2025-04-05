@@ -1,10 +1,11 @@
-import './title.css';
+// components/Title.jsx
+import { TitleContainer, TitleText } from './styled';
 
-export default function Title({ children, name }){
-  return(
-    <div className="title">
+export default function Title({ children, name }) {
+  return (
+    <TitleContainer>
       {children}
-      <span>{name}</span>
-    </div>
-  )
+      <TitleText>{name}</TitleText>
+    </TitleContainer>
+  );
 }

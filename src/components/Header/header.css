@@ -1,41 +1,44 @@
-/* Sidebar */
+/* SIDEBAR PADRÃO */
 .sidebar {
   width: 250px;
-  margin: 0;
-  padding: 0;
-  background: linear-gradient(135deg, #3b4a7d, #2b3458); /* Gradiente para um visual mais sofisticado */
+  background: linear-gradient(135deg, #3b4a7d, #2b3458);
   position: fixed;
-  height: 100%;
-  overflow: auto;
-  box-shadow: 4px 0 12px rgba(0, 0, 0, 0.15); /* Sombra suave para um efeito mais moderno */
-  transition: width 0.3s ease, box-shadow 0.3s ease;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  overflow-y: auto;
+  box-shadow: 4px 0 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease-in-out;
+  z-index: 1000;
 }
 
-.sidebar div {
+/* AVATAR COM BACKGROUND */
+.avatar-area {
   background: url("../../assets/cover.png");
   background-size: cover;
   background-position: center;
-  height: 200px;
+  height: 140px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: height 0.3s ease; /* Transição suave para a altura do cabeçalho */
+  padding-top: 10px;
 }
 
-.sidebar div img {
-  width: 130px;
-  height: 130px;
+.avatar-img {
+  width: 100px;
+  height: 100px;
   border-radius: 50%;
   object-fit: cover;
   filter: drop-shadow(2px 3px 6px rgba(0, 0, 0, 0.3));
-  transition: transform 0.3s ease, filter 0.3s ease;
+  transition: transform 0.3s ease;
 }
 
-.sidebar div img:hover {
-  transform: scale(1.15); /* Efeito de zoom suave */
-  filter: drop-shadow(4px 6px 12px rgba(0, 0, 0, 0.5)); /* Sombra mais intensa no hover */
+.avatar-img:hover {
+  transform: scale(1.1);
+  filter: drop-shadow(4px 6px 12px rgba(0, 0, 0, 0.5));
 }
 
+/* LINKS DA SIDEBAR */
 .sidebar a {
   display: flex;
   align-items: center;
@@ -43,68 +46,119 @@
   text-decoration: none;
   color: #fff;
   font-weight: 600;
-  letter-spacing: 1px;
-  transition: all 0.3s ease;
-  border-left: 4px solid transparent;
   font-size: 1rem;
+  gap: 12px;
+  border-left: 4px solid transparent;
+  transition: all 0.3s ease;
 }
 
 .sidebar a svg {
-  margin-right: 1rem;
   font-size: 1.3rem;
 }
 
 .sidebar a:hover {
-  background-color: rgba(0, 0, 0, 0.1);
-  color: #6c8ce4;
-  border-left-color: #6c8ce4;
-  transform: translateX(8px); /* Deslocamento suave no hover */
+  background-color: rgba(255, 255, 255, 0.08);
+  color: #9bc4ff;
+  border-left-color: #9bc4ff;
 }
 
 .sidebar a.active {
-  background-color: rgba(0, 0, 0, 0.15);
-  color: #6c8ce4;
-  border-left-color: #6c8ce4;
-  padding-left: 30px; /* Adiciona um destaque maior ao item ativo */
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #9bc4ff;
+  border-left-color: #9bc4ff;
 }
 
+/* MENU CONTRATOS */
+.menu-collapsible {
+  margin-top: 10px;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  padding: 16px 24px;
+  color: #fff;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  gap: 12px;
+  transition: background-color 0.3s ease;
+}
+
+.menu-item:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: #9bc4ff;
+}
+
+.submenu {
+  display: flex;
+  flex-direction: column;
+  padding-left: 40px;
+  margin-top: 4px;
+}
+
+.submenu a {
+  color: #fff;
+  font-size: 0.9rem;
+  padding: 6px 0;
+  transition: color 0.2s;
+}
+
+.submenu a:hover {
+  color: #9bc4ff;
+  text-decoration: underline;
+}
+
+/* CONTEÚDO PRINCIPAL */
 .content {
   margin-left: 250px;
   padding: 25px 2rem;
   transition: margin-left 0.3s ease;
   background: #f5f5f5;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra leve para o conteúdo */
+  min-height: 100vh;
+  box-sizing: border-box;
 }
 
-/* Responsividade */
+/* RESPONSIVO */
 @media screen and (max-width: 768px) {
   .sidebar {
+    position: relative;
     width: 100%;
     height: auto;
-    position: relative;
     box-shadow: none;
   }
 
-  .sidebar div {
-    height: 160px;
+  .avatar-area {
+    height: auto;
+    padding: 16px;
+    justify-content: center;
+    background-position: center;
   }
 
-  .sidebar div img {
-    width: 100px;
-    height: 100px;
+  .avatar-img {
+    width: 80px;
+    height: 80px;
   }
 
   .sidebar a {
-    padding: 12px;
-    font-size: 0.9rem;
     justify-content: center;
+    padding: 12px;
+    font-size: 0.95rem;
     border-left: none;
-    border-bottom: 2px solid transparent;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   }
 
-  .sidebar a:hover {
-    border-bottom-color: #6c8ce4;
+  .sidebar a svg {
+    margin: 0;
+  }
+
+  .menu-item {
+    justify-content: center;
+  }
+
+  .submenu {
+    padding-left: 0;
+    align-items: center;
   }
 
   .content {
@@ -114,13 +168,13 @@
 }
 
 @media screen and (max-width: 480px) {
-  .sidebar a {
-    font-size: 0.8rem;
-    padding: 10px;
+  .avatar-img {
+    width: 60px;
+    height: 60px;
   }
 
-  .sidebar a svg {
-    margin-right: 0.5rem;
-    font-size: 1.1rem;
+  .sidebar a {
+    font-size: 0.85rem;
+    padding: 10px;
   }
 }
