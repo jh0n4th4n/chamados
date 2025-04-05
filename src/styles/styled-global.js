@@ -232,6 +232,8 @@ export const StyledTable = styled.table`
 `;
 
 export const LoadMoreButton = styled.button`
+  width: 200px;
+  margin-left: 20px;
   margin-top: 1.5em;
   padding: 0.8em 1.5em;
   background-color: #181c2e;
@@ -245,7 +247,7 @@ export const LoadMoreButton = styled.button`
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 
   &:hover {
-    background-color: #0125f3;
+    background-color:rgb(5, 18, 90);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     transform: scale(1.02);
   }
