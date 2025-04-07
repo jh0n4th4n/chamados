@@ -119,7 +119,7 @@ export default function Contratos() {
                         </StyledButton>
                     </FormProfile>
 
-                    <NewButton to="/contratos/novo" className="new">
+                    <NewButton to="/contratos" className="new">
                         <FiPlus color="#FFF" size={25} />
                         Novo Contrato
                     </NewButton>
