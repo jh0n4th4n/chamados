@@ -9,6 +9,7 @@ import Graphs from '../pages/Graficos';
 import Users from '../pages/Usuarios';
 import NotFound from '../pages/Acesso Negado';
 import Contratos from '../pages/Contratos';
+import Contratostable from '../pages/Contratos/contratos';
 
 function RoutesApp() {
   return (
@@ -26,6 +27,7 @@ function RoutesApp() {
       <Route path="/users" element={<Private role="admin"><Users /></Private>} />
       <Route path="/graphs" element={<Private role="admin"><Graphs /></Private>} />
       <Route path="/contratos" element={<Private role="admin"><Contratos /></Private>} />
+      <Route path="/contratos/novo" element={<Private role="admin"><Contratostable /></Private>} />
 
       {/* Página 404 */}
       <Route path="*" element={<NotFound />} />
